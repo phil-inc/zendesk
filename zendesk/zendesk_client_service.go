@@ -1,4 +1,4 @@
-package zdclient
+package zendesk
 
 import (
 	"bytes"
