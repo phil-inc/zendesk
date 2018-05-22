@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/phil-inc/mailchimp-go/query"
+	"github.com/google/go-querystring/query"
 )
 
 // Ticket represents a Zendesk Ticket.

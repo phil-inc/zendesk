@@ -3,15 +3,12 @@ package zdclient
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
-
-	"github.com/phil-inc/plib/core/util"
 )
 
 // Client describes a client for the Zendesk Core API.
@@ -78,6 +75,7 @@ type client struct {
 //
 // Three environment variables are required: ZENDESK_DOMAIN, ZENDESK_USERNAME and ZENDESK_PASSWORD
 // they will provide parameters to the NewClient function
+/*
 func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 	domain := util.Config("zendesk.domain")
 	if domain == "" {
@@ -96,6 +94,7 @@ func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 
 	return NewClient(domain, username, password, middleware...)
 }
+*/
 
 // NewClient creates a new Client.
 //
