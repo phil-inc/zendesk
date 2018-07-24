@@ -9,10 +9,10 @@ import (
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/locales
 type Locale struct {
-	ID        *int64     `json:"id,omitempty"`
-	URL       *string    `json:"url,omitempty"`
-	Locale    *string    `json:"locale,omitempty"`
-	Name      *string    `json:"name,omitempty"`
+	ID        int64      `json:"id,omitempty"`
+	URL       string     `json:"url,omitempty"`
+	Locale    string     `json:"locale,omitempty"`
+	Name      string     `json:"name,omitempty"`
 	CreatedAt *time.Time `json:"created_at,omitempty"`
 	UpdatedAt *time.Time `json:"updated_at,omitempty"`
 }

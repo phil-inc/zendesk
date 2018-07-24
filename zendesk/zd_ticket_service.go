@@ -14,43 +14,43 @@ import (
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/tickets
 type Ticket struct {
-	ID               *int64         `json:"id,omitempty"`
-	URL              *string        `json:"url,omitempty"`
-	ExternalID       *string        `json:"external_id,omitempty"`
-	Type             *string        `json:"type,omitempty"`
-	Subject          *string        `json:"subject,omitempty"`
-	RawSubject       *string        `json:"raw_subject,omitempty"`
-	Description      *string        `json:"description,omitempty"`
+	ID               int64          `json:"id,omitempty"`
+	URL              string         `json:"url,omitempty"`
+	ExternalID       string         `json:"external_id,omitempty"`
+	Type             string         `json:"type,omitempty"`
+	Subject          string         `json:"subject,omitempty"`
+	RawSubject       string         `json:"raw_subject,omitempty"`
+	Description      string         `json:"description,omitempty"`
 	Comment          *TicketComment `json:"comment,omitempty"`
-	Priority         *string        `json:"priority,omitempty"`
-	Status           *string        `json:"status,omitempty"`
-	Recipient        *string        `json:"recipient,omitempty"`
-	RequesterID      *int64         `json:"requester_id,omitempty"`
+	Priority         string         `json:"priority,omitempty"`
+	Status           string         `json:"status,omitempty"`
+	Recipient        string         `json:"recipient,omitempty"`
+	RequesterID      int64          `json:"requester_id,omitempty"`
 	Requester        *User          `json:"requester,omitempty"`
-	SubmitterID      *int64         `json:"submitter_id,omitempty"`
-	AssigneeID       *int64         `json:"assignee_id,omitempty"`
-	OrganizationID   *int64         `json:"organization_id,omitempty"`
-	GroupID          *int64         `json:"group_id,omitempty"`
+	SubmitterID      int64          `json:"submitter_id,omitempty"`
+	AssigneeID       int64          `json:"assignee_id,omitempty"`
+	OrganizationID   int64          `json:"organization_id,omitempty"`
+	GroupID          int64          `json:"group_id,omitempty"`
 	CollaboratorIDs  []int64        `json:"collaborator_ids,omitempty"`
-	ForumTopicID     *int64         `json:"forum_topic_id,omitempty"`
-	ProblemID        *int64         `json:"problem_id,omitempty"`
-	HasIncidents     *bool          `json:"has_incidents,omitempty"`
+	ForumTopicID     int64          `json:"forum_topic_id,omitempty"`
+	ProblemID        int64          `json:"problem_id,omitempty"`
+	HasIncidents     bool           `json:"has_incidents,omitempty"`
 	DueAt            *time.Time     `json:"due_at,omitempty"`
 	Tags             []string       `json:"tags,omitempty"`
 	Via              *Via           `json:"via,omitempty"`
 	CreatedAt        *time.Time     `json:"created_at,omitempty"`
 	UpdatedAt        *time.Time     `json:"updated_at,omitempty"`
 	CustomFields     []CustomField  `json:"custom_fields,omitempty"`
-	BrandID          *int64         `json:"brand_id,omitempty"`
-	TicketFormID     *int64         `json:"ticket_form_id,omitempty"`
-	FollowupSourceID *int64         `json:"via_followup_source_id,omitempty"`
+	BrandID          int64          `json:"brand_id,omitempty"`
+	TicketFormID     int64          `json:"ticket_form_id,omitempty"`
+	FollowupSourceID int64          `json:"via_followup_source_id,omitempty"`
 
 	AdditionalTags []string `json:"additional_tags,omitempty"`
 	RemoveTags     []string `json:"remove_tags,omitempty"`
 }
 
 type CustomField struct {
-	ID    *int64      `json:"id"`
+	ID    int64       `json:"id"`
 	Value interface{} `json:"value"`
 }
 
@@ -124,12 +124,12 @@ func (c *client) DeleteTicket(id int64) error {
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/ticket_comments
 type TicketComment struct {
-	ID          *int64       `json:"id,omitempty"`
-	Type        *string      `json:"type,omitempty"`
-	Body        *string      `json:"body,omitempty"`
-	HTMLBody    *string      `json:"html_body,omitempty"`
-	Public      *bool        `json:"public,omitempty"`
-	AuthorID    *int64       `json:"author_id,omitempty"`
+	ID          int64        `json:"id,omitempty"`
+	Type        string       `json:"type,omitempty"`
+	Body        string       `json:"body,omitempty"`
+	HTMLBody    string       `json:"html_body,omitempty"`
+	Public      bool         `json:"public,omitempty"`
+	AuthorID    int64        `json:"author_id,omitempty"`
 	Attachments []Attachment `json:"attachments,omitempty"`
 	CreatedAt   *time.Time   `json:"created_at,omitempty"`
 	Uploads     []string     `json:"uploads,omitempty"`
@@ -145,17 +145,17 @@ func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/attachments
 type Attachment struct {
-	ID          *int64  `json:"id,omitempty"`
-	FileName    *string `json:"file_name,omitempty"`
-	ContentURL  *string `json:"content_url,omitempty"`
-	ContentType *string `json:"content_type,omitempty"`
-	Size        *int64  `json:"size,omitempty"`
-	Inline      *bool   `json:"inline,omitempty"`
+	ID          int64  `json:"id,omitempty"`
+	FileName    string `json:"file_name,omitempty"`
+	ContentURL  string `json:"content_url,omitempty"`
+	ContentType string `json:"content_type,omitempty"`
+	Size        int64  `json:"size,omitempty"`
+	Inline      bool   `json:"inline,omitempty"`
 }
 
 // Upload represents a Zendesk file upload.
 type Upload struct {
-	Token       *string      `json:"token"`
+	Token       string       `json:"token"`
 	Attachment  *Attachment  `json:"attachment"`
 	Attachments []Attachment `json:"attachments"`
 }
@@ -172,10 +172,10 @@ func (c *client) ShowAttachment(id int64) (*Attachment, error) {
 // UploadFile uploads a file as a io.Reader.
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/attachments#uploading-files
-func (c *client) UploadFile(filename string, token *string, filecontent io.Reader) (*Upload, error) {
+func (c *client) UploadFile(filename string, token string, filecontent io.Reader) (*Upload, error) {
 	params, err := query.Values(struct {
-		Filename string  `url:"filename"`
-		Token    *string `url:"token,omitempty"`
+		Filename string `url:"filename"`
+		Token    string `url:"token,omitempty"`
 	}{filename, token})
 	if err != nil {
 		return nil, err
@@ -200,13 +200,13 @@ type Via struct {
 }
 
 type TicketField struct {
-	ID              *int64     `json:"id,omitempty"`
-	Type            *string    `json:"string,omitempty"`
-	Title           *string    `json:"title,omitempty"`
-	Description     *string    `json:"description,omitempty"`
-	Position        *int64     `json:"position,omitempty"`
-	Active          *bool      `json:"active,omitempty"`
-	VisibleInPortal *bool      `json:"visible_in_portal,omitempty"`
+	ID              int64      `json:"id,omitempty"`
+	Type            string     `json:"string,omitempty"`
+	Title           string     `json:"title,omitempty"`
+	Description     string     `json:"description,omitempty"`
+	Position        int64      `json:"position,omitempty"`
+	Active          bool       `json:"active,omitempty"`
+	VisibleInPortal bool       `json:"visible_in_portal,omitempty"`
 	CreatedAt       *time.Time `json:"created_at,omitempty"`
 	UpdatedAt       *time.Time `json:"updated_at,omitempty"`
 }

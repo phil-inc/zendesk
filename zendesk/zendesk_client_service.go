@@ -51,7 +51,7 @@ type Client interface {
 	UpdateOrganization(int64, *Organization) (*Organization, error)
 	UpdateTicket(int64, *Ticket) (*Ticket, error)
 	UpdateUser(int64, *User) (*User, error)
-	UploadFile(string, *string, io.Reader) (*Upload, error)
+	UploadFile(string, string, io.Reader) (*Upload, error)
 	GetAllTickets() ([]Ticket, error)
 	GetAllUsers() ([]User, error)
 }
@@ -237,8 +237,8 @@ func unmarshall(res *http.Response, out interface{}) error {
 		apierr := new(APIError)
 		apierr.Response = res
 		if err := json.NewDecoder(res.Body).Decode(apierr); err != nil {
-			apierr.Type = String("Unknown")
-			apierr.Description = String("Oops! Something went wrong when parsing the error response.")
+			apierr.Type = "Unknown"
+			apierr.Description = "Oops! Something went wrong when parsing the error response."
 		}
 		return apierr
 	}
@@ -278,24 +278,24 @@ type APIPayload struct {
 type APIError struct {
 	Response *http.Response
 
-	Type        *string                       `json:"error,omitmepty"`
-	Description *string                       `json:"description,omitempty"`
-	Details     *map[string][]*APIErrorDetail `json:"details,omitempty"`
+	Type        string                       `json:"error,omitmepty"`
+	Description string                       `json:"description,omitempty"`
+	Details     map[string][]*APIErrorDetail `json:"details,omitempty"`
 }
 
 func (e *APIError) Error() string {
 	msg := fmt.Sprintf("%v %v: %d", e.Response.Request.Method, e.Response.Request.URL, e.Response.StatusCode)
 
-	if e.Type != nil {
-		msg = fmt.Sprintf("%s %v", msg, *e.Type)
+	if e.Type != "" {
+		msg = fmt.Sprintf("%s %v", msg, e.Type)
 	}
 
-	if e.Description != nil {
-		msg = fmt.Sprintf("%s: %v", msg, *e.Description)
+	if e.Description != "" {
+		msg = fmt.Sprintf("%s: %v", msg, e.Description)
 	}
 
 	if e.Details != nil {
-		msg = fmt.Sprintf("%s: %+v", msg, *e.Details)
+		msg = fmt.Sprintf("%s: %+v", msg, e.Details)
 	}
 
 	return msg
@@ -303,19 +303,19 @@ func (e *APIError) Error() string {
 
 // APIErrorDetail represents a detail about an APIError.
 type APIErrorDetail struct {
-	Type        *string `json:"error,omitempty"`
-	Description *string `json:"description,omitempty"`
+	Type        string `json:"error,omitempty"`
+	Description string `json:"description,omitempty"`
 }
 
 func (e *APIErrorDetail) Error() string {
 	msg := ""
 
-	if e.Type != nil {
-		msg = *e.Type + ": "
+	if e.Type != "" {
+		msg = e.Type + ": "
 	}
 
-	if e.Description != nil {
-		msg += *e.Description
+	if e.Description != "" {
+		msg += e.Description
 	}
 
 	return msg
