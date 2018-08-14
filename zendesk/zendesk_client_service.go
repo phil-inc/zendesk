@@ -37,6 +37,7 @@ type Client interface {
 	ListRequestedTickets(int64) ([]Ticket, error)
 	ListTicketComments(int64) ([]TicketComment, error)
 	ListTicketFields() ([]TicketField, error)
+	ListTicketForms() ([]TicketForm, error)
 	ListTicketIncidents(int64) ([]Ticket, error)
 	ListUsers(*ListUsersOptions) ([]User, error)
 	SearchUsers(string) ([]User, error)
@@ -272,6 +273,8 @@ type APIPayload struct {
 	Upload                  *Upload                  `json:"upload,omitempty"`
 	User                    *User                    `json:"user,omitempty"`
 	Users                   []User                   `json:"users,omitempty"`
+	TicketForm              *TicketForm              `json:"ticket_form,omitempty"`
+	TicketForms             []TicketForm             `json:"ticket_forms,omitempty"`
 }
 
 // APIError represents an error response returnted by the API.

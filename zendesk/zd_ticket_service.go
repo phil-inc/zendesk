@@ -199,16 +199,57 @@ type Via struct {
 	Channel *string
 }
 
+type TicketForm struct {
+	URL                string     `json:"url,omitempty"`
+	ID                 int64      `json:"id,omitempty"`
+	Name               string     `json:"name,omitempty"`
+	RawName            string     `json:"raw_name,omitempty"`
+	DisplayName        string     `json:"display_name,omitempty"`
+	RawDisplayName     string     `json:"raw_display_name,omitempty"`
+	EndUserVisible     bool       `json:"end_user_visible,omitempty"`
+	Position           int64      `json:"position,omitempty"`
+	TicketFieldIDs     []int64    `json:"ticket_field_ids,omitempty"`
+	Active             bool       `json:"active,omitempty"`
+	Default            bool       `json:"default,omitempty"`
+	CreatedAt          *time.Time `json:"created_at,omitempty"`
+	UpdatedAt          *time.Time `json:"updated_at,omitempty"`
+	InAllBrands        bool       `json:"in_all_brands,omitempty"`
+	RestrictedBrandIDs []int64    `json:"restricted_brand_ids,omitempty"`
+}
+
+func (c *client) ListTicketForms() ([]TicketForm, error) {
+	out := new(APIPayload)
+	err := c.get(fmt.Sprintf("/api/v2/ticket_forms.json"), out)
+	return out.TicketForms, err
+}
+
 type TicketField struct {
-	ID              int64      `json:"id,omitempty"`
-	Type            string     `json:"string,omitempty"`
-	Title           string     `json:"title,omitempty"`
-	Description     string     `json:"description,omitempty"`
-	Position        int64      `json:"position,omitempty"`
-	Active          bool       `json:"active,omitempty"`
-	VisibleInPortal bool       `json:"visible_in_portal,omitempty"`
-	CreatedAt       *time.Time `json:"created_at,omitempty"`
-	UpdatedAt       *time.Time `json:"updated_at,omitempty"`
+	ID                  int64               `json:"id,omitempty"`
+	Type                TicketFieldType     `json:"type,omitempty"`
+	Title               string              `json:"title,omitempty"`
+	Description         string              `json:"description,omitempty"`
+	Position            int64               `json:"position,omitempty"`
+	Active              bool                `json:"active,omitempty"`
+	Required            bool                `json:"required,omitempty"`
+	RegexpForValidation string              `json:"regexp_for_validation,omitempty"`
+	VisibleInPortal     bool                `json:"visible_in_portal,omitempty"`
+	EditableInPortal    bool                `json:"editable_in_portal,omitempty"`
+	RequiredInPortal    bool                `json:"required_in_portal,omitempty"`
+	CreatedAt           *time.Time          `json:"created_at,omitempty"`
+	UpdatedAt           *time.Time          `json:"updated_at,omitempty"`
+	SystemFieldOptions  []SystemFieldOption `json:"system_field_options,omitempty"`
+	CustomFieldOptions  []CustomFieldOption `json:"custom_field_options,omitempty"`
+}
+type SystemFieldOption struct {
+	Name  string `json:"name,omitempty"`
+	Value string `json:"value,omitempty"`
+}
+type CustomFieldOption struct {
+	ID      int64  `json:"id,omitempty"`
+	Name    string `json:"name,omitempty"`
+	RawName string `json:"raw_name,omitempty"`
+	Value   string `json:"value,omitempty"`
+	Default bool   `json:"default,omitempty"`
 }
 
 // ListTicketFields list all availbale custom ticket fields
@@ -218,3 +259,26 @@ func (c *client) ListTicketFields() ([]TicketField, error) {
 
 	return out.TicketFields, err
 }
+
+type TicketFieldType string
+
+const (
+	// System field types
+	SubjectType     TicketFieldType = "subject"
+	DescriptionType TicketFieldType = "description"
+	StatusType      TicketFieldType = "status"
+	TicketType      TicketFieldType = "tickettype"
+	PriorityType    TicketFieldType = "priority"
+	GroupType       TicketFieldType = "group"
+	AssigneeType    TicketFieldType = "assignee"
+
+	// Customed field types
+	TextType     TicketFieldType = "text"
+	TextAreaType TicketFieldType = "textarea"
+	CheckBoxType TicketFieldType = "checkbox"
+	DateType     TicketFieldType = "date"
+	IntegerType  TicketFieldType = "integer"
+	DecimalType  TicketFieldType = "decimal"
+	RegExpType   TicketFieldType = "regexp"
+	TaggerType   TicketFieldType = "tagger"
+)
