@@ -128,7 +128,7 @@ type TicketComment struct {
 	Type        string       `json:"type,omitempty"`
 	Body        string       `json:"body,omitempty"`
 	HTMLBody    string       `json:"html_body,omitempty"`
-	Public      bool         `json:"public,omitempty"`
+	Public      bool         `json:"public"`
 	AuthorID    int64        `json:"author_id,omitempty"`
 	Attachments []Attachment `json:"attachments,omitempty"`
 	CreatedAt   *time.Time   `json:"created_at,omitempty"`
