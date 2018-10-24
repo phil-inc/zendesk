@@ -1,1 +1,3 @@
 package: github.com/phil-inc/zendesk
+import:
+- package: github.com/phil-inc/plib
