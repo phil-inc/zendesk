@@ -282,3 +282,11 @@ const (
 	RegExpType   TicketFieldType = "regexp"
 	TaggerType   TicketFieldType = "tagger"
 )
+
+func (c *client) AddTicketTags(id int64, tags []string) ([]string, error) {
+	in := &APIPayload{Tags: tags}
+	out := new(APIPayload)
+	err := c.put(fmt.Sprintf("/api/v2/tickets/%d/tags.json", id), in, out)
+
+	return out.Tags, err
+}

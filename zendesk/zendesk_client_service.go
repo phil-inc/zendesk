@@ -16,6 +16,7 @@ type Client interface {
 	WithHeader(name, value string) Client
 
 	AddUserTags(int64, []string) ([]string, error)
+	AddTicketTags(int64, []string) ([]string, error)
 	BatchUpdateManyTickets([]Ticket) error
 	BulkUpdateManyTickets([]int64, *Ticket) error
 	CreateIdentity(int64, *UserIdentity) (*UserIdentity, error)
@@ -114,7 +115,7 @@ func NewURLClient(endpoint, username, password string, middleware ...MiddlewareF
 
 	c := &client{
 		baseURL:   baseURL,
-		userAgent: "Go-Zendesk",
+		userAgent: "PHIL-Zendesk",
 		username:  username,
 		password:  password,
 		reqFunc:   http.DefaultClient.Do,
