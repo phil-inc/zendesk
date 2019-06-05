@@ -41,6 +41,7 @@ type Client interface {
 	ListTicketForms() ([]TicketForm, error)
 	ListTicketIncidents(int64) ([]Ticket, error)
 	ListUsers(*ListUsersOptions) ([]User, error)
+	MakeIdentityPrimary(int64, int64) ([]UserIdentity, error)
 	SearchUsers(string) ([]User, error)
 	ShowIdentity(int64, int64) (*UserIdentity, error)
 	ShowLocale(int64) (*Locale, error)
