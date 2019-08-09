@@ -277,6 +277,8 @@ type APIPayload struct {
 	Users                   []User                   `json:"users,omitempty"`
 	TicketForm              *TicketForm              `json:"ticket_form,omitempty"`
 	TicketForms             []TicketForm             `json:"ticket_forms,omitempty"`
+	TicketMetric            *TicketMetric            `json:"ticket_metric,omitempty"`
+	TicketMetrics           []TicketMetric           `json:"ticket_metrics,omitempty"`
 }
 
 // APIError represents an error response returnted by the API.
