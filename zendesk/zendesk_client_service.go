@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/phil-inc/plib/core/util"
 )
 
 // Client describes a client for the Zendesk Core API.
@@ -103,6 +105,19 @@ func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 
 // NewClient creates a new Client.
 //
+
+// // NewZendeskEnvClient create zendesk client for request
+func NewEnvClient() (zendesk.Client, error) {
+	if zClient == nil {
+		c, err := zendesk.NewClient(util.Config("zendesk.domain"), util.Config("zendesk.username"), util.Config("zendesk.password"))
+		if err != nil {
+			return nil, fmt.Errorf("Zendesk Client not created. Error: %s", err.Error())
+		}
+		zClient = &c
+	}
+	return *zClient, nil
+}
+
 // You can use either a user email/password combination or an API token.
 // For the latter, append /token to the email and use the API token as a password
 func NewClient(domain, username, password string, middleware ...MiddlewareFunction) (Client, error) {
