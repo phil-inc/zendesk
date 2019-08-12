@@ -107,7 +107,7 @@ func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 //
 
 // // NewZendeskEnvClient create zendesk client for request
-func NewEnvClient() (zendesk.Client, error) {
+func NewEnvClient() (zClient *client, error) {
 	if zClient == nil {
 		c, err := zendesk.NewClient(util.Config("zendesk.domain"), util.Config("zendesk.username"), util.Config("zendesk.password"))
 		if err != nil {
