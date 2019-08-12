@@ -57,6 +57,8 @@ type Client interface {
 	UploadFile(string, string, io.Reader) (*Upload, error)
 	GetAllTickets() ([]Ticket, error)
 	GetAllUsers() ([]User, error)
+	GetAllTicketMetrics() ([]TicketMetric, error)
+	ShowTicketMetric(int64) (*TicketMetric, error)
 }
 
 type RequestFunction func(*http.Request) (*http.Response, error)
