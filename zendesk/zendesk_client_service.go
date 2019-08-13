@@ -187,6 +187,11 @@ func (c *client) do(method, endpoint string, in, out interface{}) error {
 	res, err := c.request(method, endpoint, headers, bytes.NewReader(payload))
 	fmt.Println("zendesk_client_service")
 	fmt.Println(res)
+
+
+	result := make(map[string]interface{})
+	unmarshall(res, result)
+	fmt.Println(result)
 	if err != nil {
 		return err
 	}
@@ -280,6 +285,8 @@ type APIPayload struct {
 	TicketForm              *TicketForm              `json:"ticket_form,omitempty"`
 	TicketForms             []TicketForm             `json:"ticket_forms,omitempty"`
 }
+
+
 
 // APIError represents an error response returnted by the API.
 type APIError struct {
