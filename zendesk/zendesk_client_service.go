@@ -196,7 +196,6 @@ func (c *client) do(method, endpoint string, in, out interface{}) error {
 	// being rate limited or we failed with a retriable error.
 	if res.Header.Get("Retry-After") != "" {
 		after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-		unmarshall(res, result)
 		if err != nil || after == 0 {
 			return unmarshall(res, out)
 		}
