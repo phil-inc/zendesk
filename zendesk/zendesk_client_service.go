@@ -185,6 +185,8 @@ func (c *client) do(method, endpoint string, in, out interface{}) error {
 	}
 
 	res, err := c.request(method, endpoint, headers, bytes.NewReader(payload))
+	fmt.Println("zendesk_client_service")
+	fmt.Println(res)
 	if err != nil {
 		return err
 	}
