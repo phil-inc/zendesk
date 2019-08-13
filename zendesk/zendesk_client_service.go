@@ -218,8 +218,9 @@ func (c *client) do(method, endpoint string, in, out interface{}) error {
 		}
 		defer res.Body.Close()
 	}
-
-	return unmarshall(res, out)
+	err := unmarshall(res, out)
+	fmt.Println(out)
+	return err
 }
 
 func (c *client) get(endpoint string, out interface{}) error {
