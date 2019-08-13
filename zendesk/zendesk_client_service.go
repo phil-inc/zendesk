@@ -3,6 +3,7 @@ package zendesk
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -79,10 +80,6 @@ type client struct {
 }
 
 // NewEnvClient creates a new Client configured via environment variables.
-//
-// Three environment variables are required: ZENDESK_DOMAIN, ZENDESK_USERNAME and ZENDESK_PASSWORD
-// they will provide parameters to the NewClient function
-/*
 func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 	domain := util.Config("zendesk.domain")
 	if domain == "" {
@@ -101,23 +98,8 @@ func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 
 	return NewClient(domain, username, password, middleware...)
 }
-*/
 
 // NewClient creates a new Client.
-//
-
-// // NewZendeskEnvClient create zendesk client for request
-func NewEnvClient() (zClient *client, error) {
-	if zClient == nil {
-		c, err := zendesk.NewClient(util.Config("zendesk.domain"), util.Config("zendesk.username"), util.Config("zendesk.password"))
-		if err != nil {
-			return nil, fmt.Errorf("Zendesk Client not created. Error: %s", err.Error())
-		}
-		zClient = &c
-	}
-	return *zClient, nil
-}
-
 // You can use either a user email/password combination or an API token.
 // For the latter, append /token to the email and use the API token as a password
 func NewClient(domain, username, password string, middleware ...MiddlewareFunction) (Client, error) {
