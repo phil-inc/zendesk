@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Ticket represents a Zendesk Ticket.
+// TicketMetric represents a Zendesk TicketMetric.
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/ticket_metrics
 
@@ -27,12 +27,10 @@ type TicketMetric struct {
 	FirstResolutionTime  Object     `json:"first_resolution_time_in_minutes,omitempty"`
 	ReplyTime            Object     `json:"reply_time_in_minutes,omitempty"`
 	FullResolutionTime   Object     `json:"full_resolution_time_in_minutes,omitempty"`
-
-	AgentWaitTime     Object `json:"agent_wait_time_in_minutes,omitempty"`
-	RequesterWaitTime Object `json:"requester_wait_time_in_minutes,omitempty"`
-
-	CreatedAt *time.Time `json:"created_at,omitempty"`
-	UpdatedAt *time.Time `json:"updated_at,omitempty"`
+	AgentWaitTime        Object     `json:"agent_wait_time_in_minutes,omitempty"`
+	RequesterWaitTime    Object     `json:"requester_wait_time_in_minutes,omitempty"`
+	CreatedAt            *time.Time `json:"created_at,omitempty"`
+	UpdatedAt            *time.Time `json:"updated_at,omitempty"`
 }
 
 type Object struct {
