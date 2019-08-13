@@ -288,6 +288,7 @@ type APIPayload struct {
 	Users                   []User                   `json:"users,omitempty"`
 	TicketForm              *TicketForm              `json:"ticket_form,omitempty"`
 	TicketForms             []TicketForm             `json:"ticket_forms,omitempty"`
+	NextPage                string                   `json:"next_page,omitempty"`
 }
 
 
