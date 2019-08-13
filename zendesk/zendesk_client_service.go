@@ -191,7 +191,6 @@ func (c *client) do(method, endpoint string, in, out interface{}) error {
 
 	result := make(map[string]interface{})
 	fmt.Println("Outside if")
-	unmarshall(res, result)
 	fmt.Println(result)
 	if err != nil {
 		return err
