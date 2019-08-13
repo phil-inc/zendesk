@@ -211,7 +211,6 @@ func (c *client) do(method, endpoint string, in, out interface{}) error {
 	}
 	err = unmarshall(res, out)
 	fmt.Println(out)
-	nextPage := out.NextPage
 	return err
 }
 
@@ -231,12 +230,6 @@ func (c *client) delete(endpoint string, out interface{}) error {
 	return c.do("DELETE", endpoint, nil, out)
 }
 
-func (c *client) getNextPage(out interface{}) string {
-	if out && out.NextPage {
-		return out.NextPage
-	}
-	return ""
-}
 
 func marshall(in interface{}) ([]byte, error) {
 	if in == nil {
