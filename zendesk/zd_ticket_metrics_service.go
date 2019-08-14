@@ -52,8 +52,8 @@ func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 }
 
 func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-	tickets, err := c.getAllTicketMetrics("/api/v2/ticket_metrics.json", nil)
-	return tickets, err
+	ticketmetrics, err := c.getAllTicketMetrics("/api/v2/ticket_metrics.json", nil)
+	return ticketmetrics, err
 }
 
 func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketMetric, error) {

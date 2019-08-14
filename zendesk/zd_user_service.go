@@ -1,6 +1,7 @@
 package zendesk
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -162,10 +163,49 @@ func (c *client) AddUserTags(id int64, tags []string) ([]string, error) {
 // GetAllUsers pull the list of all the users
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/users#list-users
+
+// func (c *client) GetAllUsers() ([]User, error) {
+// 	out := new(APIPayload)
+// 	err := c.get("/api/v2/users.json", out)
+// 	return out.Users, err
+// }
+
 func (c *client) GetAllUsers() ([]User, error) {
-	out := new(APIPayload)
-	err := c.get("/api/v2/users.json", out)
-	return out.Users, err
+	users, err := c.getAllUsers("/api/v2/users.json", nil)
+	return users, err
+}
+
+func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
+	result := make([]User, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	dataPerPage := new(APIPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	err = unmarshall(res, dataPerPage)
+
+	prevPage := ""
+	for dataPerPage.NextPage != prevPage {
+		result = append(result, dataPerPage.Users...)
+		prevPage = dataPerPage.NextPage
+		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		err = unmarshall(res, dataPerPage)
+	}
+
+	return result, err
 }
 
 //UpdateEndUser updates the info of one end user
