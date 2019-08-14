@@ -210,6 +210,8 @@ func (c *client) do(method, endpoint string, in, out interface{}) error {
 	}
 	err = unmarshall(res, out)
 	fmt.Println(out)
+	fmt.Println("===============================")
+	fmt.Println(out.NextPage)
 	return err
 }
 

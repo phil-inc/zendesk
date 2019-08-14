@@ -63,6 +63,8 @@ func (c *client) ShowTicket(id int64) (*Ticket, error) {
 func (c *client) GetAllTickets() ([]Ticket, error) {
 	out := new(APIPayload)
 	err := c.get("/api/v2/tickets.json", out)
+	fmt.Println("inside getAllTickets")
+	fmt.Println(out.NextPage)
 	return out.Tickets, err
 }
 
