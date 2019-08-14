@@ -18,9 +18,10 @@ type TicketComment struct {
 	Public      bool         `json:"public,omitempty"`
 	AuthorID    int64        `json:"author_id,omitempty"`
 	Attachments []Attachment `json:"attachments,omitempty"`
-	Via         *ViaObject   `json:"via,omitempty"`
+	Via         *Via         `json:"via,omitempty"`
 	MetaData    interface{}  `json:"metadata,omitempty"`
 	CreatedAt   *time.Time   `json:"created_at,omitempty"`
+	Uploads     []string     `json:"uploads,omitempty"`
 }
 
 type Attachment struct {
@@ -29,6 +30,7 @@ type Attachment struct {
 	ContentURL   string      `json:"content_url"`
 	ContentType  string      `json:"content_type"`
 	Size         int64       `json:"size"`
+	Inline       bool        `json:"inline,omitempty"`
 	Thumbnails   []Thumbnail `json:"thumbnails"`
 }
 
@@ -40,7 +42,7 @@ type Thumbnail struct {
 	Size        int    `json:"size"`
 }
 
-type ViaObject struct {
+type Via struct {
 	Channel string `json:"channel"`
 	Source  *Flow  `json:"source"`
 }
@@ -98,15 +100,3 @@ func (c *client) ShowTicketComments(id int64) ([]TicketComment, error) {
 	err := c.get(fmt.Sprintf("/api/v2/tickets/%d/comments.json", id), out)
 	return out.TicketComments, err
 }
-
-// func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-// 	out := new(APIPayload)
-// 	err := c.get("/api/v2/ticket_metrics.json", out)
-// 	return out.TicketMetrics, err
-// }
-
-// func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
-// 	out := new(APIPayload)
-// 	err := c.get(fmt.Sprintf("/api/v2/ticket_metrics/%d.json", id), out)
-// 	return out.TicketMetric, err
-// }
