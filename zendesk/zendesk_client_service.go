@@ -235,22 +235,6 @@ func (c *client) getAll(endpoint string, in interface{})([]Ticket, error) {
 
 	defer res.Body.Close()
 
-	// Retry the request if the retry after header is present. This can happen when we are
-	// being rate limited or we failed with a retriable error.
-	// if res.Header.Get("Retry-After") != "" {
-	// 	after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-	// 	if err != nil || after == 0 {
-	// 		return unmarshall(res, out)
-	// 	}
-
-	// 	time.Sleep(time.Duration(after) * time.Second)
-
-	// 	res, err = c.request(method, endpoint, headers, bytes.NewReader(payload))
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	defer res.Body.Close()
-	// }
 	err = unmarshall(res, dataPerPage)
 
 	prevPage := ""
