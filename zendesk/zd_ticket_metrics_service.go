@@ -1,6 +1,7 @@
 package zendesk
 
 import (
+	"bytes"
 	"fmt"
 	"time"
 )
@@ -38,14 +39,52 @@ type Object struct {
 	Business int64 `json:"business"`
 }
 
-func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-	out := new(APIPayload)
-	err := c.get("/api/v2/ticket_metrics.json", out)
-	return out.TicketMetrics, err
-}
+// func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
+// 	out := new(APIPayload)
+// 	err := c.get("/api/v2/ticket_metrics.json", out)
+// 	return out.TicketMetrics, err
+// }
 
 func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 	out := new(APIPayload)
 	err := c.get(fmt.Sprintf("/api/v2/ticket_metrics/%d.json", id), out)
 	return out.TicketMetric, err
+}
+
+func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
+	tickets, err := c.getAllTicketMetrics("/api/v2/ticket_metrics.json", nil)
+	return tickets, err
+}
+
+func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketMetric, error) {
+	result := make([]TicketMetric, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	dataPerPage := new(APIPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	err = unmarshall(res, dataPerPage)
+
+	prevPage := ""
+	for dataPerPage.NextPage != prevPage {
+		result = append(result, dataPerPage.TicketMetrics...)
+		prevPage = dataPerPage.NextPage
+		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		err = unmarshall(res, dataPerPage)
+	}
+
+	return result, err
 }
