@@ -215,6 +215,60 @@ func (c *client) get(endpoint string, out interface{}) error {
 	return c.do("GET", endpoint, nil, out)
 }
 
+func (c *client) getAll(endpoint string, in interface{})([]Ticket, error) {
+	result := make([]Ticket, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return result, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	copy := new(APIPayload)
+	if err != nil {
+		return result, err
+	}
+
+	defer res.Body.Close()
+
+	// Retry the request if the retry after header is present. This can happen when we are
+	// being rate limited or we failed with a retriable error.
+	// if res.Header.Get("Retry-After") != "" {
+	// 	after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+	// 	if err != nil || after == 0 {
+	// 		return unmarshall(res, out)
+	// 	}
+
+	// 	time.Sleep(time.Duration(after) * time.Second)
+
+	// 	res, err = c.request(method, endpoint, headers, bytes.NewReader(payload))
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	defer res.Body.Close()
+	// }
+	err = unmarshall(res, copy)
+	fmt.Println("===============================")
+	fmt.Println("NextPage")
+	prevPage := ""
+	for copy.NextPage != prevPage {
+		fmt.Println(copy.NextPage[38:])
+		result = append(result, copy.Tickets...)
+		prevPage = copy.NextPage
+		res, _ := c.request("GET", copy.NextPage[38:], headers, bytes.NewReader(payload))
+		err = unmarshall(res, copy)
+		fmt.Println(copy.NextPage)
+	}
+	fmt.Println(len(result))
+	fmt.Println("===============================")
+	fmt.Println("NextPage")
+	fmt.Println(copy.NextPage)
+	return result, err
+}
+
 func (c *client) post(endpoint string, in, out interface{}) error {
 	return c.do("POST", endpoint, in, out)
 }
