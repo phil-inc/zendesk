@@ -219,17 +219,18 @@ func (c *client) getAll(endpoint string, in interface{})([]Ticket, error) {
 	result := make([]Ticket, 0)
 	payload, err := marshall(in)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	headers := map[string]string{}
 	if in != nil {
 		headers["Content-Type"] = "application/json"
 	}
+
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
-	copy := new(APIPayload)
+	dataPerPage := new(APIPayload)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	defer res.Body.Close()
@@ -250,22 +251,16 @@ func (c *client) getAll(endpoint string, in interface{})([]Ticket, error) {
 	// 	}
 	// 	defer res.Body.Close()
 	// }
-	err = unmarshall(res, copy)
-	fmt.Println("===============================")
-	fmt.Println("NextPage")
+	err = unmarshall(res, dataPerPage)
+
 	prevPage := ""
-	for copy.NextPage != prevPage {
-		fmt.Println(copy.NextPage[38:])
-		result = append(result, copy.Tickets...)
-		prevPage = copy.NextPage
-		res, _ := c.request("GET", copy.NextPage[38:], headers, bytes.NewReader(payload))
-		err = unmarshall(res, copy)
-		fmt.Println(copy.NextPage)
+	for dataPerPage.NextPage != prevPage {
+		result = append(result, dataPerPage.Tickets...)
+		prevPage = dataPerPage.NextPage
+		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		err = unmarshall(res, dataPerPage)
 	}
-	fmt.Println(len(result))
-	fmt.Println("===============================")
-	fmt.Println("NextPage")
-	fmt.Println(copy.NextPage)
+
 	return result, err
 }
 
