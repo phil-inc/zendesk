@@ -215,6 +215,39 @@ func (c *client) get(endpoint string, out interface{}) error {
 	return c.do("GET", endpoint, nil, out)
 }
 
+func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
+	result := make([]Ticket, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	dataPerPage := new(APIPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	defer res.Body.Close()
+
+	err = unmarshall(res, dataPerPage)
+
+	prevPage := ""
+	for dataPerPage.NextPage != prevPage {
+		result = append(result, dataPerPage.Tickets...)
+		prevPage = dataPerPage.NextPage
+		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		err = unmarshall(res, dataPerPage)
+	}
+
+	return result, err
+}
+
 func (c *client) post(endpoint string, in, out interface{}) error {
 	return c.do("POST", endpoint, in, out)
 }
@@ -280,6 +313,7 @@ type APIPayload struct {
 	TicketMetric            *TicketMetric            `json:"ticket_metric,omitempty"`
 	TicketMetrics           []TicketMetric           `json:"ticket_metrics,omitempty"`
 	TicketComments          []TicketComment          `json:"ticket_comments,omitempty"`
+	NextPage                string                   `json:"next_page,omitempty"`
 }
 
 // APIError represents an error response returnted by the API.
