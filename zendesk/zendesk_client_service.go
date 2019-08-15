@@ -3,12 +3,15 @@ package zendesk
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/phil-inc/plib/core/util"
 )
 
 // Client describes a client for the Zendesk Core API.
@@ -57,6 +60,9 @@ type Client interface {
 	UploadFile(string, string, io.Reader) (*Upload, error)
 	GetAllTickets() ([]Ticket, error)
 	GetAllUsers() ([]User, error)
+	GetAllTicketMetrics() ([]TicketMetric, error)
+	ShowTicketMetric(int64) (*TicketMetric, error)
+	ShowTicketComments(int64) ([]TicketComment, error)
 }
 
 type RequestFunction func(*http.Request) (*http.Response, error)
@@ -75,10 +81,6 @@ type client struct {
 }
 
 // NewEnvClient creates a new Client configured via environment variables.
-//
-// Three environment variables are required: ZENDESK_DOMAIN, ZENDESK_USERNAME and ZENDESK_PASSWORD
-// they will provide parameters to the NewClient function
-/*
 func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 	domain := util.Config("zendesk.domain")
 	if domain == "" {
@@ -97,10 +99,8 @@ func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 
 	return NewClient(domain, username, password, middleware...)
 }
-*/
 
 // NewClient creates a new Client.
-//
 // You can use either a user email/password combination or an API token.
 // For the latter, append /token to the email and use the API token as a password
 func NewClient(domain, username, password string, middleware ...MiddlewareFunction) (Client, error) {
@@ -215,7 +215,7 @@ func (c *client) get(endpoint string, out interface{}) error {
 	return c.do("GET", endpoint, nil, out)
 }
 
-func (c *client) getAll(endpoint string, in interface{})([]Ticket, error) {
+func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 	result := make([]Ticket, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -241,7 +241,6 @@ func (c *client) getAll(endpoint string, in interface{})([]Ticket, error) {
 	for dataPerPage.NextPage != prevPage {
 		result = append(result, dataPerPage.Tickets...)
 		prevPage = dataPerPage.NextPage
-		fmt.Println(prevPage)
 		if prevPage == "" {
 			break
 		}
@@ -315,6 +314,9 @@ type APIPayload struct {
 	Users                   []User                   `json:"users,omitempty"`
 	TicketForm              *TicketForm              `json:"ticket_form,omitempty"`
 	TicketForms             []TicketForm             `json:"ticket_forms,omitempty"`
+	TicketMetric            *TicketMetric            `json:"ticket_metric,omitempty"`
+	TicketMetrics           []TicketMetric           `json:"ticket_metrics,omitempty"`
+	TicketComments          []TicketComment          `json:"ticket_comments,omitempty"`
 	NextPage                string                   `json:"next_page,omitempty"`
 }
 
