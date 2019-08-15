@@ -241,7 +241,12 @@ func (c *client) getAll(endpoint string, in interface{})([]Ticket, error) {
 	for dataPerPage.NextPage != prevPage {
 		result = append(result, dataPerPage.Tickets...)
 		prevPage = dataPerPage.NextPage
+		fmt.Println(prevPage)
+		if prevPage == "" {
+			break;
+		}
 		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		dataPerPage = new(APIPayload)
 		err = unmarshall(res, dataPerPage)
 	}
 
