@@ -164,11 +164,6 @@ func (c *client) AddUserTags(id int64, tags []string) ([]string, error) {
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/users#list-users
 
-// func (c *client) GetAllUsers() ([]User, error) {
-// 	out := new(APIPayload)
-// 	err := c.get("/api/v2/users.json", out)
-// 	return out.Users, err
-// }
 
 func (c *client) GetAllUsers() ([]User, error) {
 	users, err := c.getAllUsers("/api/v2/users.json", nil)
