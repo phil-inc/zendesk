@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// Ticket represents a Zendesk Ticket.
+// TicketComment represents a Zendesk Ticket Comment.
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/ticket_comments
 
