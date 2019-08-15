@@ -201,7 +201,7 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 	for dataPerPage.NextPage != prevPage {
 		result = append(result, dataPerPage.Users...)
 		prevPage = dataPerPage.NextPage
-		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload)) //38 is the starting postion of api endpoint
 		err = unmarshall(res, dataPerPage)
 	}
 

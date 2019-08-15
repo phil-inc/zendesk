@@ -39,11 +39,15 @@ type Object struct {
 	Business int64 `json:"business"`
 }
 
-// func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-// 	out := new(APIPayload)
-// 	err := c.get("/api/v2/ticket_metrics.json", out)
-// 	return out.TicketMetrics, err
-// }
+/* The following implementation works for no pagination case
+
+func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
+	out := new(APIPayload)
+	err := c.get("/api/v2/ticket_metrics.json", out)
+	return out.TicketMetrics, err
+}
+
+*/
 
 func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 	out := new(APIPayload)
@@ -82,7 +86,7 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 	for dataPerPage.NextPage != prevPage {
 		result = append(result, dataPerPage.TicketMetrics...)
 		prevPage = dataPerPage.NextPage
-		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload)) //38 is the starting postion of api endpoint
 		err = unmarshall(res, dataPerPage)
 	}
 
