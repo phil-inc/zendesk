@@ -86,7 +86,11 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 	for dataPerPage.NextPage != prevPage {
 		result = append(result, dataPerPage.TicketMetrics...)
 		prevPage = dataPerPage.NextPage
+		if prevPage == "" {
+			break
+		}
 		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload)) //38 is the starting postion of api endpoint
+		dataPerPage = new(APIPayload)
 		err = unmarshall(res, dataPerPage)
 	}
 
