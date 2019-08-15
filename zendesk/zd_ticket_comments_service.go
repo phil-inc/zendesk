@@ -24,6 +24,10 @@ type TicketComment struct {
 	Uploads     []string     `json:"uploads,omitempty"`
 }
 
+// Attachment represents a Zendesk attachment for tickets and forum posts.
+//
+// Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/attachments
+
 type Attachment struct {
 	AttachmentID int64       `json:"id"`
 	FileName     string      `json:"file_name"`

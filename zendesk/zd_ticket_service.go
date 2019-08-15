@@ -69,6 +69,15 @@ func (c *client) ShowTicket(id int64) (*Ticket, error) {
 	return out.Ticket, err
 }
 
+/*  The implementation below only works for no pagination case.
+
+func (c *client) GetAllTickets() ([]Ticket, error) {
+	out := new(APIPayload)
+	err := c.get("/api/v2/tickets.json", out)
+	return out.Tickets, err
+}
+*/
+
 func (c *client) GetAllTickets() ([]Ticket, error) {
 	tickets, err := c.getAll("/api/v2/tickets.json", nil)
 	return tickets, err
@@ -149,19 +158,6 @@ func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
 	return out.Comments, err
 }
 
-// Attachment represents a Zendesk attachment for tickets and forum posts.
-//
-// Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/attachments
-// type Attachment struct {
-// 	ID          int64       `json:"id,omitempty"`
-// 	FileName    string      `json:"file_name,omitempty"`
-// 	ContentURL  string      `json:"content_url,omitempty"`
-// 	ContentType string      `json:"content_type,omitempty"`
-// 	Size        int64       `json:"size,omitempty"`
-// 	Inline      bool        `json:"inline,omitempty"`
-// 	Thumbnails  []Thumbnail `json:"thumbnails"`
-// }
-
 // Upload represents a Zendesk file upload.
 type Upload struct {
 	Token       string       `json:"token"`
@@ -203,10 +199,6 @@ func (c *client) UploadFile(filename string, token string, filecontent io.Reader
 	err = unmarshall(res, out)
 	return out.Upload, err
 }
-
-// type Via struct {
-// 	Channel *string
-// }
 
 type TicketForm struct {
 	URL                string     `json:"url,omitempty"`
