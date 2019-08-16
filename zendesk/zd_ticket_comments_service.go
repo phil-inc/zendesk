@@ -47,8 +47,8 @@ type Thumbnail struct {
 }
 
 type Via struct {
-	Channel string `json:"channel"`
-	Source  *Flow  `json:"source"`
+	Channel *string `json:"channel"`
+	Source  *Flow   `json:"source"`
 }
 type Flow struct {
 	To   *ToObject   `json:"to"`
