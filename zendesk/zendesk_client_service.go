@@ -241,6 +241,7 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 	for dataPerPage.NextPage != prevPage {
 		result = append(result, dataPerPage.Tickets...)
 		prevPage = dataPerPage.NextPage
+		fmt.Println(prevPage)
 		if prevPage == "" {
 			break
 		}
