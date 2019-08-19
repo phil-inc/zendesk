@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/phil-inc/plib/core/util"
@@ -233,19 +234,25 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 		return nil, err
 	}
 
+	apiV2 := "/api/v2/"
+	fieldName := strings.Split(endpoint[len(apiV2):], ".")[0]
 	defer res.Body.Close()
 
 	err = unmarshall(res, dataPerPage)
 
+	apiStartIndex := strings.Index(dataPerPage.NextPage, apiV2)
 	prevPage := ""
+
 	for dataPerPage.NextPage != prevPage {
-		result = append(result, dataPerPage.Tickets...)
+		if fieldName == "tickets" {
+			result = append(result, dataPerPage.Tickets...)
+		}
 		prevPage = dataPerPage.NextPage
-		fmt.Println(prevPage)
+
 		if prevPage == "" {
 			break
 		}
-		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload))
+		res, _ := c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
 		err = unmarshall(res, dataPerPage)
 	}
