@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -241,21 +242,35 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 	err = unmarshall(res, dataPerPage)
 
 	apiStartIndex := strings.Index(dataPerPage.NextPage, apiV2)
-	prevPage := ""
+	currentPage := endpoint
 
-	for dataPerPage.NextPage != prevPage {
-		if fieldName == "tickets" {
-			result = append(result, dataPerPage.Tickets...)
+	var totalWaitTime int64
+	for currentPage != "" {
+		// if too many requests(res.StatusCode == 429), delay sending request
+		if res.StatusCode == 429 {
+			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			totalWaitTime += after
+			if err != nil {
+				return nil, err
+			}
+			time.Sleep(time.Duration(after) * time.Second)
+		} else {
+			if fieldName == "tickets" {
+				result = append(result, dataPerPage.Tickets...)
+			}
+			currentPage = dataPerPage.NextPage
+			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
 		}
-		prevPage = dataPerPage.NextPage
-
-		if prevPage == "" {
-			break
-		}
-		res, _ := c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
+		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
 		err = unmarshall(res, dataPerPage)
+		if err != nil {
+			return nil, err
+		}
 	}
+	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
+	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
 
 	return result, err
 }
