@@ -244,6 +244,7 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 	prevPage := ""
 
 	for {
+		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
 			if err != nil {
