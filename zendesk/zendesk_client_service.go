@@ -243,19 +243,31 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 	apiStartIndex := strings.Index(dataPerPage.NextPage, apiV2)
 	prevPage := ""
 
-	for dataPerPage.NextPage != prevPage {
-		if fieldName == "tickets" {
-			result = append(result, dataPerPage.Tickets...)
+	for {
+		if res.StatusCode == 429 {
+			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			time.Sleep(time.Duration(after) * time.Second)
+		} else {
+			if fieldName == "tickets" {
+				result = append(result, dataPerPage.Tickets...)
+			}
+			prevPage = dataPerPage.NextPage
+			fmt.Printf("prevPage: %s\n", prevPage)
+			if prevPage == "" {
+				break
+			}
 		}
-		prevPage = dataPerPage.NextPage
-
-		if prevPage == "" {
-			break
-		}
-		res, _ := c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
+		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
 		err = unmarshall(res, dataPerPage)
+		if err != nil {
+			return nil, err
+		}
 	}
+	fmt.Println("number of pages: ", len(result))
 
 	return result, err
 }
