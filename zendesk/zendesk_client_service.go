@@ -249,7 +249,7 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v second\n", after)
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
