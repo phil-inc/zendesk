@@ -3,6 +3,9 @@ package zendesk
 import (
 	"bytes"
 	"fmt"
+	"log"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -78,21 +81,42 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 		return nil, err
 	}
 
+	apiV2 := "/api/v2/"
+	fieldName := strings.Split(endpoint[len(apiV2):], ".")[0]
 	defer res.Body.Close()
 
 	err = unmarshall(res, dataPerPage)
 
-	prevPage := ""
-	for dataPerPage.NextPage != prevPage {
-		result = append(result, dataPerPage.TicketMetrics...)
-		prevPage = dataPerPage.NextPage
-		if prevPage == "" {
-			break
+	apiStartIndex := strings.Index(dataPerPage.NextPage, apiV2)
+	currentPage := endpoint
+
+	var totalWaitTime int64
+	for currentPage != "" {
+		// if too many requests(res.StatusCode == 429), delay sending request
+		if res.StatusCode == 429 {
+			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			totalWaitTime += after
+			if err != nil {
+				return nil, err
+			}
+			time.Sleep(time.Duration(after) * time.Second)
+		} else {
+			if fieldName == "ticket_metrics" {
+				result = append(result, dataPerPage.TicketMetrics...)
+			}
+			currentPage = dataPerPage.NextPage
+			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
 		}
-		res, _ := c.request("GET", dataPerPage.NextPage[38:], headers, bytes.NewReader(payload)) //38 is the starting postion of api endpoint
+		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
 		err = unmarshall(res, dataPerPage)
+		if err != nil {
+			return nil, err
+		}
 	}
+	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
+	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
 
 	return result, err
 }
