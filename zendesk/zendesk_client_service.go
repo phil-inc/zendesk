@@ -308,11 +308,8 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 		// handle page not found
 		if res.StatusCode == 404 {
 			log.Printf("404 not found: %s\n", endpoint)
-			continue
-		}
-
-		// handle too many requests (rate limit)
-		if res.StatusCode == 429 {
+			// handle too many requests (rate limit)
+		} else if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
 			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
@@ -321,14 +318,15 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 			}
 			time.Sleep(time.Duration(after) * time.Second)
 			continue
+		} else {
+			err = unmarshall(res, dataPerPage)
+			if err != nil {
+				return nil, err
+			}
+
+			result = append(result, *dataPerPage.Ticket)
 		}
 
-		err = unmarshall(res, dataPerPage)
-		if err != nil {
-			return nil, err
-		}
-
-		result = append(result, *dataPerPage.Ticket)
 		dataPerPage = new(APIPayload)
 		ticketID++
 		endpoint = fmt.Sprintf("%s%v%s", endpointPrefix, ticketID, endpointPostfix)
