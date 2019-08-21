@@ -307,7 +307,7 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 
 		// handle page not found
 		if res.StatusCode == 404 {
-			log.Printf("404 not found: %s\n", endpoint)
+			log.Printf("[ZENDESK] 404 not found: %s\n", endpoint)
 			// handle too many requests (rate limit)
 		} else if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
