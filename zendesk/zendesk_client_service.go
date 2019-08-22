@@ -275,6 +275,69 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 	return result, err
 }
 
+func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
+	endpointPrefix := "/api/v2/tickets/"
+	endpointPostfix := ".json"
+	result := make([]Ticket, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+	record := new(APIPayload)
+
+	// currently we can manually set the starting and ending IDs for data pulling
+	// because memory may reach its limit if the dataset is too large
+	// ideally, we want to load data to database in batches on the fly
+	// instead of loading the entire chunk
+	startID := 1
+	endID := 10000
+	ticketID := startID // start
+	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketID, endpointPostfix)
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	defer res.Body.Close()
+
+	var totalWaitTime int64
+	for ticketID < endID {
+		log.Printf("[ZENDESK] currently extracting: %s\n", endpoint)
+
+		// handle page not found
+		if res.StatusCode == 404 {
+			log.Printf("[ZENDESK] 404 not found: %s\n", endpoint)
+			// handle too many requests (rate limit)
+		} else if res.StatusCode == 429 {
+			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			totalWaitTime += after
+			if err != nil {
+				return nil, err
+			}
+			time.Sleep(time.Duration(after) * time.Second)
+			continue
+		} else {
+			err = unmarshall(res, record)
+			if err != nil {
+				return nil, err
+			}
+
+			result = append(result, *record.Ticket)
+		}
+
+		record = new(APIPayload)
+		ticketID++
+		endpoint = fmt.Sprintf("%s%v%s", endpointPrefix, ticketID, endpointPostfix)
+		res, _ = c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	}
+
+	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
+	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	return result, nil
+}
+
 func (c *client) post(endpoint string, in, out interface{}) error {
 	return c.do("POST", endpoint, in, out)
 }

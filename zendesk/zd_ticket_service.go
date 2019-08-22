@@ -14,13 +14,13 @@ import (
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/tickets
 type Ticket struct {
-	ID          int64  `json:"id,omitempty"`
-	URL         string `json:"url,omitempty"`
-	ExternalID  string `json:"external_id,omitempty"`
-	Type        string `json:"type,omitempty"`
-	Subject     string `json:"subject,omitempty"`
-	RawSubject  string `json:"raw_subject,omitempty"`
-	Description string `json:"description,omitempty"`
+	ID                 int64         `json:"id,omitempty"`
+	URL                string        `json:"url,omitempty"`
+	ExternalID         string        `json:"external_id,omitempty"`
+	Type               string        `json:"type,omitempty"`
+	Subject            string        `json:"subject,omitempty"`
+	RawSubject         string        `json:"raw_subject,omitempty"`
+	Description        string        `json:"description,omitempty"`
 	Priority           string        `json:"priority,omitempty"`
 	Status             string        `json:"status,omitempty"`
 	Recipient          string        `json:"recipient,omitempty"`
@@ -78,7 +78,7 @@ func (c *client) GetAllTickets() ([]Ticket, error) {
 */
 
 func (c *client) GetAllTickets() ([]Ticket, error) {
-	tickets, err := c.getAll("/api/v2/tickets.json", nil)
+	tickets, err := c.getOneByOne(nil)
 	return tickets, err
 }
 
@@ -135,7 +135,6 @@ func (c *client) ListTicketIncidents(problemID int64) ([]Ticket, error) {
 func (c *client) DeleteTicket(id int64) error {
 	return c.delete(fmt.Sprintf("/api/v2/tickets/%d.json", id), nil)
 }
-
 
 func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
 	out := new(APIPayload)
