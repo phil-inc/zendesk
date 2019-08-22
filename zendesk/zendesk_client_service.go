@@ -288,7 +288,7 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 	if in != nil {
 		headers["Content-Type"] = "application/json"
 	}
-	dataPerPage := new(APIPayload)
+	record := new(APIPayload)
 
 	// currently we can manually set the starting and ending IDs for data pulling
 	// because memory may reach its limit if the dataset is too large
@@ -319,15 +319,15 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 			time.Sleep(time.Duration(after) * time.Second)
 			continue
 		} else {
-			err = unmarshall(res, dataPerPage)
+			err = unmarshall(res, record)
 			if err != nil {
 				return nil, err
 			}
 
-			result = append(result, *dataPerPage.Ticket)
+			result = append(result, *record.Ticket)
 		}
 
-		dataPerPage = new(APIPayload)
+		record = new(APIPayload)
 		ticketID++
 		endpoint = fmt.Sprintf("%s%v%s", endpointPrefix, ticketID, endpointPostfix)
 		res, _ = c.request("GET", endpoint, headers, bytes.NewReader(payload))
