@@ -64,43 +64,8 @@ type FromObject struct {
 	Title string `json:"title"`
 }
 
-/*  For Reference. Please do not delete.
-// type MetaObject struct {
-
-// }
-
-// metadata struct in https://developer.zendesk.com/rest_api/docs/support/ticket_comments#comment-flags
-
-metadata: {
-  system: { ... },
-  flags: [2,5],
- "flags_options": {
-   "2": {
-     "trusted": false
-   },
-   "5": {
-     "message": {
-       "file": "printer_manual.pdf",
-       "account_limit": "20"
-     },
-     "trusted": false
-   }
- },
- "trusted": false,
- "suspension_type_id": null
-}
-
-*/
-
-/*
-//GET /api/v2/tickets/{ticket_id}/comments.json
-
-curl https://{subdomain}.zendesk.com/api/v2/tickets/{ticket_id}/comments.json \
--H "Content-Type: application/json" -v -u {email_address}:{password}
-*/
-
-func (c *client) ShowTicketComments(id int64) ([]TicketComment, error) {
+func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
 	out := new(APIPayload)
 	err := c.get(fmt.Sprintf("/api/v2/tickets/%d/comments.json", id), out)
-	return out.TicketComments, err
+	return out.Comments, err
 }

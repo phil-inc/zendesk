@@ -136,12 +136,6 @@ func (c *client) DeleteTicket(id int64) error {
 	return c.delete(fmt.Sprintf("/api/v2/tickets/%d.json", id), nil)
 }
 
-func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
-	out := new(APIPayload)
-	err := c.get(fmt.Sprintf("/api/v2/tickets/%d/comments.json", id), out)
-	return out.Comments, err
-}
-
 // Upload represents a Zendesk file upload.
 type Upload struct {
 	Token       string       `json:"token"`
