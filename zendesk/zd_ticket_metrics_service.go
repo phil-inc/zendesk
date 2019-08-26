@@ -28,29 +28,19 @@ type TicketMetric struct {
 	AssignedAt           *time.Time `json:"assigned_at,omitempty"`
 	SolvedAt             *time.Time `json:"solved_at,omitempty"`
 	LatestCommentAddedAt *time.Time `json:"latest_comment_added_at,omitempty"`
-	FirstResolutionTime  Object     `json:"first_resolution_time_in_minutes,omitempty"`
-	ReplyTime            Object     `json:"reply_time_in_minutes,omitempty"`
-	FullResolutionTime   Object     `json:"full_resolution_time_in_minutes,omitempty"`
-	AgentWaitTime        Object     `json:"agent_wait_time_in_minutes,omitempty"`
-	RequesterWaitTime    Object     `json:"requester_wait_time_in_minutes,omitempty"`
+	FirstResolutionTime  *Minutes   `json:"first_resolution_time_in_minutes,omitempty"`
+	ReplyTime            *Minutes   `json:"reply_time_in_minutes,omitempty"`
+	FullResolutionTime   *Minutes   `json:"full_resolution_time_in_minutes,omitempty"`
+	AgentWaitTime        *Minutes   `json:"agent_wait_time_in_minutes,omitempty"`
+	RequesterWaitTime    *Minutes   `json:"requester_wait_time_in_minutes,omitempty"`
 	CreatedAt            *time.Time `json:"created_at,omitempty"`
 	UpdatedAt            *time.Time `json:"updated_at,omitempty"`
 }
 
-type Object struct {
+type Minutes struct {
 	Calendar int64 `json:"calendar"`
 	Business int64 `json:"business"`
 }
-
-/* The following implementation works for no pagination case
-
-func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-	out := new(APIPayload)
-	err := c.get("/api/v2/ticket_metrics.json", out)
-	return out.TicketMetrics, err
-}
-
-*/
 
 func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 	out := new(APIPayload)
@@ -59,10 +49,12 @@ func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 }
 
 func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-	ticketmetrics, err := c.getAllTicketMetrics("/api/v2/ticket_metrics.json", nil)
+	ticketmetrics, err := c.getTicketMetricOneByOne(nil)
 	return ticketmetrics, err
 }
 
+// due to the archived tickets, this function cannot be used to extract all tickets metrics
+// use getTicketMetricOneByOne
 func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketMetric, error) {
 	result := make([]TicketMetric, 0)
 	payload, err := marshall(in)
@@ -120,3 +112,69 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 
 	return result, err
 }
+
+func (c *client) getTicketMetricOneByOne(in interface{}) ([]TicketMetric, error) {
+	endpointPrefix := "/api/v2/tickets/"
+	endpointPostfix := "/metrics.json"
+	result := make([]TicketMetric, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+	record := new(APIPayload)
+
+	numTickets := len(ticketIDs)
+	if numTickets == 0 {
+		return result, nil
+	}
+	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[0], endpointPostfix)
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	defer res.Body.Close()
+
+	var totalWaitTime int64
+	for ticketInd := 1; ticketInd < numTickets; ticketInd++ {
+		log.Printf("[ZENDESK] currently extracting: %s\n", endpoint)
+
+		// handle page not found
+		if res.StatusCode == 404 {
+			log.Printf("[ZENDESK] 404 not found: %s\n", endpoint)
+			// handle too many requests (rate limit)
+		} else if res.StatusCode == 429 {
+			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			totalWaitTime += after
+			if err != nil {
+				return nil, err
+			}
+			time.Sleep(time.Duration(after) * time.Second)
+			continue
+		} else {
+			err = unmarshall(res, record)
+			if err != nil {
+				return nil, err
+			}
+			if record.TicketMetric != nil {
+				result = append(result, *record.TicketMetric)
+			} else {
+				result = append(result, record.TicketMetrics...)
+			}
+		}
+
+		record = new(APIPayload)
+		endpoint = fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[ticketInd], endpointPostfix)
+		res, _ = c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	}
+
+	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
+	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	return result, nil
+}
+
+// ticketIDs represent the tickets we pull ticket metrics for
+// currently it is set manually but should be populated manually
+var ticketIDs []int = []int{}
