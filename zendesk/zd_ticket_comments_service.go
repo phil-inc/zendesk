@@ -86,6 +86,11 @@ func (c *client) GetAllTicketComments() (map[int][]TicketComment, error) {
 func (c *client) getTicketCommentsOneByOne(in interface{}) (map[int][]TicketComment, error) {
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/comments.json"
+
+	// we need to manually set ticketIDsForComments
+	// this step will be improved once the incremental export is done
+	var ticketIDsForComments []int = []int{}
+
 	result := make(map[int][]TicketComment)
 	payload, err := marshall(in)
 	if err != nil {
@@ -140,7 +145,3 @@ func (c *client) getTicketCommentsOneByOne(in interface{}) (map[int][]TicketComm
 	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
 	return result, nil
 }
-
-// we need to manually set ticketIDsForComments
-// this step will be improved once the incremental export is done
-var ticketIDsForComments []int = []int{}
