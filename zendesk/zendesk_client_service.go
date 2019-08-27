@@ -64,6 +64,7 @@ type Client interface {
 	GetAllUsers() ([]User, error)
 	GetAllTicketMetrics() ([]TicketMetric, error)
 	ShowTicketMetric(int64) (*TicketMetric, error)
+	GetAllTicketComments() (map[int][]TicketComment, error)
 }
 
 type RequestFunction func(*http.Request) (*http.Response, error)
