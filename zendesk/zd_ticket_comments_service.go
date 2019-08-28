@@ -32,17 +32,17 @@ type TicketComment struct {
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/attachments
 
 type Attachment struct {
-	AttachmentID int64       `json:"id"`
-	FileName     string      `json:"file_name"`
-	ContentURL   string      `json:"content_url"`
-	ContentType  string      `json:"content_type"`
-	Size         int64       `json:"size"`
-	Inline       bool        `json:"inline,omitempty"`
-	Thumbnails   []Thumbnail `json:"thumbnails"`
+	ID          int64       `json:"id"`
+	FileName    string      `json:"file_name"`
+	ContentURL  string      `json:"content_url"`
+	ContentType string      `json:"content_type"`
+	Size        int64       `json:"size"`
+	Inline      bool        `json:"inline,omitempty"`
+	Thumbnails  []Thumbnail `json:"thumbnails"`
 }
 
 type Thumbnail struct {
-	ThumbnailID int    `json:"id"`
+	ID          int    `json:"id"`
 	FileName    string `json:"file_name"`
 	ContentURL  string `json:"content_url"`
 	ContentType string `json:"content_type"`
