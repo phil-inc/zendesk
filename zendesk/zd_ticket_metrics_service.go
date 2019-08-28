@@ -116,6 +116,11 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 func (c *client) getTicketMetricOneByOne(in interface{}) ([]TicketMetric, error) {
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/metrics.json"
+
+	// ticketIDs represent the tickets we pull ticket metrics for
+	// currently it is set manually but should be populated manually
+	var ticketIDs []int = []int{}
+
 	result := make([]TicketMetric, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -174,7 +179,3 @@ func (c *client) getTicketMetricOneByOne(in interface{}) ([]TicketMetric, error)
 	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
 	return result, nil
 }
-
-// ticketIDs represent the tickets we pull ticket metrics for
-// currently it is set manually but should be populated manually
-var ticketIDs []int = []int{}
