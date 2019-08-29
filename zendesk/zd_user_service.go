@@ -161,6 +161,99 @@ func (c *client) AddUserTags(id int64, tags []string) ([]string, error) {
 	return out.Tags, err
 }
 
+// GetIncrementalUsers pull the list of users modified from a specific time point
+//
+// https://developer.zendesk.com/rest_api/docs/support/incremental_export#incremental-user-export
+func (c *client) GetIncrementalUsers(unixTime int64) ([]User, error) {
+	users, err := c.getIncrementalUsers(unixTime, nil)
+	return users, err
+}
+
+func (c *client) getIncrementalUsers(unixTime int64, in interface{}) ([]User, error) {
+	result := make([]User, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+
+	url := "https://philhelp.zendesk.com/api/v2/incremental/users.json?start_time="
+	apiV2 := "/api/v2/incremental/users.json?start_time="
+	apiStartIndex := strings.Index(url, apiV2)
+	// endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
+	endpoint := "/api/v2/incremental/users.json?start_time=1420219133"
+	fmt.Println("endpoint: ", endpoint)
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	defer res.Body.Close()
+
+	dataPerPage := new(APIPayload)
+	if err != nil {
+		return nil, err
+	}
+
+	currentPage := "emptypage"
+
+	var totalWaitTime int64
+
+	for currentPage != dataPerPage.NextPage {
+
+		// if too many requests(res.StatusCode == 429), delay sending request
+		if res.StatusCode == 429 {
+			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			totalWaitTime += after
+			if err != nil {
+				return nil, err
+			}
+			time.Sleep(time.Duration(after) * time.Second)
+			dataPerPage.NextPage = currentPage
+		} else {
+			err = unmarshall(res, dataPerPage)
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, dataPerPage.Users...)
+			if currentPage == dataPerPage.NextPage {
+				break
+			}
+			currentPage = dataPerPage.NextPage
+			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
+		}
+
+		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
+
+		dataPerPage = new(APIPayload)
+	}
+	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
+	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+
+	return getUniqUsers(result), err
+}
+
+// getUniqUsers is to remove the duplicate records due to pagination
+// more details can be found int the following link
+// https://developer.zendesk.com/rest_api/docs/support/incremental_export#excluding_pagination_duplicates
+
+func getUniqUsers(users []User) []User {
+	var Empty struct{}
+	keys := make(map[string]struct{})
+	result := make([]User, 0)
+	for _, user := range users {
+		key := fmt.Sprintf("%v %v\n", user.ID, user.UpdatedAt)
+		if _, ok := keys[key]; ok {
+			continue
+		} else {
+			keys[key] = Empty
+			result = append(result, user)
+		}
+	}
+	return result
+}
+
 // GetAllUsers pull the list of all the users
 //
 // Zendesk Core API docs: https://developer.zendesk.com/rest_api/docs/core/users#list-users
