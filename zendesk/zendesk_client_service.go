@@ -61,6 +61,7 @@ type Client interface {
 	UpdateUser(int64, *User) (*User, error)
 	UploadFile(string, string, io.Reader) (*Upload, error)
 	GetAllTickets() ([]Ticket, error)
+	GetIncrementalTickets(int64) ([]Ticket, error)
 	GetAllUsers() ([]User, error)
 	GetAllTicketMetrics() ([]TicketMetric, error)
 	ShowTicketMetric(int64) (*TicketMetric, error)
