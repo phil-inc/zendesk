@@ -18,7 +18,7 @@ type TicketComment struct {
 	Body        string       `json:"body,omitempty"`
 	HTMLBody    string       `json:"html_body,omitempty"`
 	PlainBody   string       `json:"plain_body,omitempty"`
-	Public      bool         `json:"public,omitempty"`
+	Public      bool         `json:"public"`
 	AuthorID    int64        `json:"author_id,omitempty"`
 	Attachments []Attachment `json:"attachments,omitempty"`
 	Via         *Via         `json:"via,omitempty"`
