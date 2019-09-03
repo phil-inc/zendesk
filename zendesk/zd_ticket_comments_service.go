@@ -73,8 +73,8 @@ func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
 	return out.Comments, err
 }
 
-func (c *client) GetAllTicketComments() (map[int][]TicketComment, error) {
-	ticketCommentsMap, err := c.getTicketCommentsOneByOne(nil)
+func (c *client) GetAllTicketComments(ticketIDs []int64) (map[int64][]TicketComment, error) {
+	ticketCommentsMap, err := c.getTicketCommentsOneByOne(nil, ticketIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -83,15 +83,11 @@ func (c *client) GetAllTicketComments() (map[int][]TicketComment, error) {
 
 // getTicketCommentOneByOne return a map with ticket id as the key and
 // an array of ticket comments as its value
-func (c *client) getTicketCommentsOneByOne(in interface{}) (map[int][]TicketComment, error) {
+func (c *client) getTicketCommentsOneByOne(in interface{}, ticketIDs []int64) (map[int64][]TicketComment, error) {
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/comments.json"
 
-	// we need to manually set ticketIDsForComments
-	// this step will be improved once the incremental export is done
-	var ticketIDsForComments []int = []int{}
-
-	result := make(map[int][]TicketComment)
+	result := make(map[int64][]TicketComment)
 	payload, err := marshall(in)
 	if err != nil {
 		return nil, err
@@ -103,11 +99,11 @@ func (c *client) getTicketCommentsOneByOne(in interface{}) (map[int][]TicketComm
 	}
 	record := new(APIPayload)
 
-	numTickets := len(ticketIDsForComments)
+	numTickets := len(ticketIDs)
 	if numTickets == 0 {
 		return result, nil
 	}
-	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDsForComments[0], endpointPostfix)
+	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[0], endpointPostfix)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 
@@ -133,11 +129,11 @@ func (c *client) getTicketCommentsOneByOne(in interface{}) (map[int][]TicketComm
 			if err != nil {
 				return nil, err
 			}
-			result[ticketIDsForComments[ticketInd-1]] = record.Comments
+			result[ticketIDs[ticketInd-1]] = record.Comments
 		}
 
 		record = new(APIPayload)
-		endpoint = fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDsForComments[ticketInd], endpointPostfix)
+		endpoint = fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[ticketInd], endpointPostfix)
 		res, _ = c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	}
 
