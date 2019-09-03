@@ -184,9 +184,7 @@ func (c *client) getIncrementalUsers(unixTime int64, in interface{}) ([]User, er
 	url := "https://philhelp.zendesk.com/api/v2/incremental/users.json?start_time="
 	apiV2 := "/api/v2/incremental/users.json?start_time="
 	apiStartIndex := strings.Index(url, apiV2)
-	// endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
-	endpoint := "/api/v2/incremental/users.json?start_time=1420219133"
-	fmt.Println("endpoint: ", endpoint)
+	endpoint := fmt.Sprintf("%s%v", "/api/v2/incremental/users.json?start_time=", unixTime)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 
