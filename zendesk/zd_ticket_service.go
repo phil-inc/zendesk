@@ -109,8 +109,7 @@ func (c *client) getIncrementalTickets(unixTime int64, in interface{}) ([]Ticket
 	apiV2 := "/api/v2/incremental/tickets.json?start_time="
 	apiStartIndex := strings.Index(url, apiV2)
 	endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
-	// endpoint := "/api/v2/incremental/tickets.json?start_time=1420219133"
-	fmt.Println("endpoint: ", endpoint)
+
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 
