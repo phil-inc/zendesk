@@ -105,25 +105,19 @@ func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Tick
 		headers["Content-Type"] = "application/json"
 	}
 
-	// url := "https://philhelp.zendesk.com/api/v2/incremental/tickets.json?start_time="
-	// apiV2 := "/api/v2/incremental/tickets.json?start_time="
-	// apiStartIndex := strings.Index(url, apiV2)
-	// endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
 	apiV2 := "/api/v2/incremental/tickets.json?start_time="
 	url := "https://philhelp.zendesk.com" + apiV2
 	apiStartIndex := strings.Index(url, apiV2)
 	endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
 
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
-	defer res.Body.Close()
-
-	dataPerPage := new(APIPayload)
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
+	dataPerPage := new(APIPayload)
 	currentPage := "emptypage"
-
 	var totalWaitTime int64
 
 	for currentPage != dataPerPage.NextPage {
