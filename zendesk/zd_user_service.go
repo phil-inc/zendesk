@@ -161,15 +161,15 @@ func (c *client) AddUserTags(id int64, tags []string) ([]string, error) {
 	return out.Tags, err
 }
 
-// GetIncrementalUsers pull the list of users modified from a specific time point
+// GetUsersIncrementally pull the list of users modified from a specific time point
 //
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export#incremental-user-export
-func (c *client) GetIncrementalUsers(unixTime int64) ([]User, error) {
-	users, err := c.getIncrementalUsers(unixTime, nil)
+func (c *client) GetUsersIncrementally(unixTime int64) ([]User, error) {
+	users, err := c.getUsersIncrementally(unixTime, nil)
 	return users, err
 }
 
-func (c *client) getIncrementalUsers(unixTime int64, in interface{}) ([]User, error) {
+func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, error) {
 	result := make([]User, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -181,10 +181,11 @@ func (c *client) getIncrementalUsers(unixTime int64, in interface{}) ([]User, er
 		headers["Content-Type"] = "application/json"
 	}
 
-	url := "https://philhelp.zendesk.com/api/v2/incremental/users.json?start_time="
 	apiV2 := "/api/v2/incremental/users.json?start_time="
+	url := "https://philhelp.zendesk.com" + apiV2
 	apiStartIndex := strings.Index(url, apiV2)
-	endpoint := fmt.Sprintf("%s%v", "/api/v2/incremental/users.json?start_time=", unixTime)
+	endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
+
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 

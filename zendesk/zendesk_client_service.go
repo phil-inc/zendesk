@@ -65,7 +65,7 @@ type Client interface {
 	GetAllTicketMetrics() ([]TicketMetric, error)
 	ShowTicketMetric(int64) (*TicketMetric, error)
 	GetAllTicketComments() (map[int][]TicketComment, error)
-	GetIncrementalUsers(int64) ([]User, error)
+	GetUsersIncrementally(int64) ([]User, error)
 }
 
 type RequestFunction func(*http.Request) (*http.Response, error)
