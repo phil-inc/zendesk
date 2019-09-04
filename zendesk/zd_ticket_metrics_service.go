@@ -49,7 +49,10 @@ func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 }
 
 func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-	ticketmetrics, err := c.getTicketMetricOneByOne(nil)
+	// []int64{} is a placeholder which should be replaced by the actual tickets IDs
+	// since we only pull the entire history of ticket metrics only once, this function
+	// may not be used anymore
+	ticketmetrics, err := c.getTicketMetricOneByOne(nil, []int64{})
 	return ticketmetrics, err
 }
 
@@ -113,13 +116,9 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 	return result, err
 }
 
-func (c *client) getTicketMetricOneByOne(in interface{}) ([]TicketMetric, error) {
+func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]TicketMetric, error) {
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/metrics.json"
-
-	// ticketIDs represent the tickets we pull ticket metrics for
-	// currently it is set manually but should be populated manually
-	var ticketIDs []int = []int{}
 
 	result := make([]TicketMetric, 0)
 	payload, err := marshall(in)
@@ -178,4 +177,13 @@ func (c *client) getTicketMetricOneByOne(in interface{}) ([]TicketMetric, error)
 	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
 	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
 	return result, nil
+}
+
+func (c *client) GetTicketMetricsIncrementally(ticketIDs []int64) ([]TicketMetric, error) {
+	ticketMetrics, err := c.getTicketMetricOneByOne(nil, ticketIDs)
+	if err != nil {
+		log.Printf("[ZENDESK] error pulling ticket metrics by ticketIDs: %s\n", err)
+		return nil, err
+	}
+	return ticketMetrics, nil
 }
