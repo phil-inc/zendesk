@@ -179,7 +179,7 @@ func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]T
 	return result, nil
 }
 
-func (c *client) GetIncrementalTicketMetrics(ticketIDs []int64) ([]TicketMetric, error) {
+func (c *client) GetTicketMetricsIncrementally(ticketIDs []int64) ([]TicketMetric, error) {
 	ticketMetrics, err := c.getTicketMetricOneByOne(nil, ticketIDs)
 	if err != nil {
 		log.Printf("[ZENDESK] error pulling ticket metrics by ticketIDs: %s\n", err)
