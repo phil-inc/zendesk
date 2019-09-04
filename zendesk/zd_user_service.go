@@ -187,15 +187,13 @@ func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, 
 	endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
 
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
-	defer res.Body.Close()
-
-	dataPerPage := new(APIPayload)
 	if err != nil {
 		return nil, err
 	}
+	defer res.Body.Close()
 
+	dataPerPage := new(APIPayload)
 	currentPage := "emptypage"
-
 	var totalWaitTime int64
 
 	for currentPage != dataPerPage.NextPage {
