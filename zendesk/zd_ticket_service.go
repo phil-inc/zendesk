@@ -1,8 +1,10 @@
 package zendesk
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -81,6 +83,95 @@ func (c *client) GetAllTickets() ([]Ticket, error) {
 func (c *client) GetAllTickets() ([]Ticket, error) {
 	tickets, err := c.getOneByOne(nil)
 	return tickets, err
+}
+
+// GetTicketsIncrementally pull the list of tickets modified from a specific time point
+//
+// https://developer.zendesk.com/rest_api/docs/support/incremental_export
+func (c *client) GetTicketsIncrementally(unixTime int64) ([]Ticket, error) {
+	tickets, err := c.getTicketsIncrementally(unixTime, nil)
+	return tickets, err
+}
+
+func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Ticket, error) {
+	result := make([]Ticket, 0)
+	payload, err := marshall(in)
+	if err != nil {
+		return nil, err
+	}
+
+	headers := map[string]string{}
+	if in != nil {
+		headers["Content-Type"] = "application/json"
+	}
+
+	apiV2 := "/api/v2/incremental/tickets.json?start_time="
+	url := "https://philhelp.zendesk.com" + apiV2
+	apiStartIndex := strings.Index(url, apiV2)
+	endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
+
+	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	dataPerPage := new(APIPayload)
+	currentPage := "emptypage"
+	var totalWaitTime int64
+
+	for currentPage != dataPerPage.NextPage {
+
+		// if too many requests(res.StatusCode == 429), delay sending request
+		if res.StatusCode == 429 {
+			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			totalWaitTime += after
+			if err != nil {
+				return nil, err
+			}
+			time.Sleep(time.Duration(after) * time.Second)
+			dataPerPage.NextPage = currentPage
+		} else {
+			err = unmarshall(res, dataPerPage)
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, dataPerPage.Tickets...)
+			if currentPage == dataPerPage.NextPage {
+				break
+			}
+			currentPage = dataPerPage.NextPage
+			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
+		}
+
+		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
+
+		dataPerPage = new(APIPayload)
+	}
+	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
+	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+
+	return getUniqTickets(result), err
+}
+
+// getUniqTickets is to remove the duplicate records due to pagination
+// more details can be found int the following link
+// https://developer.zendesk.com/rest_api/docs/support/incremental_export#excluding_pagination_duplicates
+
+func getUniqTickets(tickets []Ticket) []Ticket {
+	var Empty struct{}
+	keys := make(map[int64]struct{})
+	result := make([]Ticket, 0)
+	for _, ticket := range tickets {
+		if _, ok := keys[ticket.ID]; ok {
+			continue
+		} else {
+			keys[ticket.ID] = Empty
+			result = append(result, ticket)
+		}
+	}
+	return result
 }
 
 func (c *client) CreateTicket(ticket *Ticket) (*Ticket, error) {
