@@ -275,7 +275,6 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 	}
 
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
-	dataPerPage := new(APIPayload)
 	if err != nil {
 		return nil, err
 	}
@@ -284,7 +283,12 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 	fieldName := strings.Split(endpoint[len(apiV2):], ".")[0]
 	defer res.Body.Close()
 
+	// APIPayload defined the fields received from Zendesk
+	dataPerPage := new(APIPayload)
 	err = unmarshall(res, dataPerPage)
+	if err != nil {
+		return nil, err
+	}
 
 	apiStartIndex := strings.Index(dataPerPage.NextPage, apiV2)
 	currentPage := endpoint
@@ -294,11 +298,12 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
-			totalWaitTime += after
 			if err != nil {
 				return nil, err
 			}
+
+			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			totalWaitTime += after
 			time.Sleep(time.Duration(after) * time.Second)
 		} else {
 			if fieldName == "users" {
