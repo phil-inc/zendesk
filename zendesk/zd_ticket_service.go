@@ -85,15 +85,15 @@ func (c *client) GetAllTickets() ([]Ticket, error) {
 	return tickets, err
 }
 
-// GetIncrementalUsers pull the list of users modified from a specific time point
+// GetTicketsIncrementally pull the list of tickets modified from a specific time point
 //
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export
-func (c *client) GetIncrementalTickets(unixTime int64) ([]Ticket, error) {
-	tickets, err := c.getIncrementalTickets(unixTime, nil)
+func (c *client) GetTicketsIncrementally(unixTime int64) ([]Ticket, error) {
+	tickets, err := c.getTicketsIncrementally(unixTime, nil)
 	return tickets, err
 }
 
-func (c *client) getIncrementalTickets(unixTime int64, in interface{}) ([]Ticket, error) {
+func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Ticket, error) {
 	result := make([]Ticket, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -105,8 +105,12 @@ func (c *client) getIncrementalTickets(unixTime int64, in interface{}) ([]Ticket
 		headers["Content-Type"] = "application/json"
 	}
 
-	url := "https://philhelp.zendesk.com/api/v2/incremental/tickets.json?start_time="
+	// url := "https://philhelp.zendesk.com/api/v2/incremental/tickets.json?start_time="
+	// apiV2 := "/api/v2/incremental/tickets.json?start_time="
+	// apiStartIndex := strings.Index(url, apiV2)
+	// endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
 	apiV2 := "/api/v2/incremental/tickets.json?start_time="
+	url := "https://philhelp.zendesk.com" + apiV2
 	apiStartIndex := strings.Index(url, apiV2)
 	endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
 
