@@ -66,7 +66,7 @@ type Client interface {
 	GetAllTicketMetrics() ([]TicketMetric, error)
 	GetTicketMetricsIncrementally([]int64) ([]TicketMetric, error)
 	ShowTicketMetric(int64) (*TicketMetric, error)
-	GetAllTicketComments([]int64) (map[int][]TicketComment, error)
+	GetAllTicketComments([]int64) (map[int64][]TicketComment, error)
 	GetUsersIncrementally(int64) ([]User, error)
 }
 
