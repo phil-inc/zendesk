@@ -148,8 +148,6 @@ func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]T
 	var totalWaitTime int64
 	log.Printf("[ZENDESK] Start for loop in getTicketMetricOneByOne")
 	for ticketInd := 1; ticketInd < numTickets; ticketInd++ {
-		log.Printf("[ZENDESK] currently extracting: %s\n", endpoint)
-
 		// handle page not found
 		if res.StatusCode == 404 {
 			log.Printf("[ZENDESK] 404 not found: %s\n", endpoint)

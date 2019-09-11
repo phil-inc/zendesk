@@ -124,7 +124,6 @@ func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Tick
 	var totalWaitTime int64
 	log.Printf("[ZENDESK] Start for loop in getTicketsIncrementally")
 	for currentPage != dataPerPage.NextPage {
-
 		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
@@ -145,7 +144,6 @@ func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Tick
 				break
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
 		}
 
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))

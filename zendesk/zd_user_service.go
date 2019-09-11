@@ -221,7 +221,6 @@ func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, 
 				break
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
 		}
 
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
