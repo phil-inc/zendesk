@@ -74,16 +74,20 @@ func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
 }
 
 func (c *client) GetAllTicketComments(ticketIDs []int64) (map[int64][]TicketComment, error) {
+	log.Printf("[ZENDESK] Start GetAllTicketComments")
 	ticketCommentsMap, err := c.getTicketCommentsOneByOne(nil, ticketIDs)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("[ZENDESK] number of ticket comments: %v", len(ticketCommentsMap))
+	log.Printf("[ZENDESK] End GetAllTicketComments")
 	return ticketCommentsMap, nil
 }
 
 // getTicketCommentOneByOne return a map with ticket id as the key and
 // an array of ticket comments as its value
 func (c *client) getTicketCommentsOneByOne(in interface{}, ticketIDs []int64) (map[int64][]TicketComment, error) {
+	log.Printf("[ZENDESK] Start getTicketCommentsOneByOne")
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/comments.json"
 
@@ -103,11 +107,14 @@ func (c *client) getTicketCommentsOneByOne(in interface{}, ticketIDs []int64) (m
 	if numTickets == 0 {
 		return result, nil
 	}
+	log.Printf("[ZENDESK] numTickets: %v", numTickets)
+
 	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[0], endpointPostfix)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 
 	var totalWaitTime int64
+	log.Printf("[ZENDESK] Start for loop in getTicketCommentsOneByOne")
 	for ticketInd := 1; ticketInd < numTickets; ticketInd++ {
 		log.Printf("[ZENDESK] currently extracting: %s\n", endpoint)
 

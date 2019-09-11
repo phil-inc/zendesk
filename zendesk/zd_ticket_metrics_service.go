@@ -49,10 +49,12 @@ func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 }
 
 func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
+	log.Printf("[ZENDESK] Start GetAllTicketMetrics")
 	// []int64{} is a placeholder which should be replaced by the actual tickets IDs
 	// since we only pull the entire history of ticket metrics only once, this function
 	// may not be used anymore
 	ticketmetrics, err := c.getTicketMetricOneByOne(nil, []int64{})
+	log.Printf("[ZENDESK] number of ticketmetrics: %v", len(ticketmetrics))
 	return ticketmetrics, err
 }
 
@@ -117,6 +119,7 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 }
 
 func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]TicketMetric, error) {
+	log.Printf("[ZENDESK] Start getTicketMetricOneByOne")
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/metrics.json"
 
@@ -136,11 +139,14 @@ func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]T
 	if numTickets == 0 {
 		return result, nil
 	}
+	log.Printf("[ZENDESK] numTickets: %v", numTickets)
+
 	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[0], endpointPostfix)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 
 	var totalWaitTime int64
+	log.Printf("[ZENDESK] Start for loop in getTicketMetricOneByOne")
 	for ticketInd := 1; ticketInd < numTickets; ticketInd++ {
 		log.Printf("[ZENDESK] currently extracting: %s\n", endpoint)
 
@@ -180,10 +186,12 @@ func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]T
 }
 
 func (c *client) GetTicketMetricsIncrementally(ticketIDs []int64) ([]TicketMetric, error) {
+	log.Printf("[ZENDESK] GetTicketMetricsIncrementally")
 	ticketMetrics, err := c.getTicketMetricOneByOne(nil, ticketIDs)
 	if err != nil {
 		log.Printf("[ZENDESK] error pulling ticket metrics by ticketIDs: %s\n", err)
 		return nil, err
 	}
+	log.Printf("[ZENDESK] number of ticketMetrics: %v", len(ticketMetrics))
 	return ticketMetrics, nil
 }

@@ -89,11 +89,14 @@ func (c *client) GetAllTickets() ([]Ticket, error) {
 //
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export
 func (c *client) GetTicketsIncrementally(unixTime int64) ([]Ticket, error) {
+	log.Printf("[ZENDESK] Start GetTicketsIncrementally")
 	tickets, err := c.getTicketsIncrementally(unixTime, nil)
+	log.Printf("[ZENDESK] Number of tickets: %v", len(tickets))
 	return tickets, err
 }
 
 func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Ticket, error) {
+	log.Printf("[ZENDESK] Start getTicketsIncrementally")
 	result := make([]Ticket, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -119,7 +122,7 @@ func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Tick
 	dataPerPage := new(APIPayload)
 	currentPage := "emptypage"
 	var totalWaitTime int64
-
+	log.Printf("[ZENDESK] Start for loop in getTicketsIncrementally")
 	for currentPage != dataPerPage.NextPage {
 
 		// if too many requests(res.StatusCode == 429), delay sending request

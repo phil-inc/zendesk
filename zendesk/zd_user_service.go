@@ -165,11 +165,14 @@ func (c *client) AddUserTags(id int64, tags []string) ([]string, error) {
 //
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export#incremental-user-export
 func (c *client) GetUsersIncrementally(unixTime int64) ([]User, error) {
+	log.Printf("[ZENDESK] Start GetUsersIncrementally")
 	users, err := c.getUsersIncrementally(unixTime, nil)
+	log.Printf("[ZENDESK] Number of Users: %v", len(users))
 	return users, err
 }
 
 func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, error) {
+	log.Printf("[ZENDESK] Start getUsersIncrementally")
 	result := make([]User, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -195,7 +198,7 @@ func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, 
 	dataPerPage := new(APIPayload)
 	currentPage := "emptypage"
 	var totalWaitTime int64
-
+	log.Printf("[ZENDESK] Start for loop in getUsersIncrementally")
 	for currentPage != dataPerPage.NextPage {
 
 		// if too many requests(res.StatusCode == 429), delay sending request
