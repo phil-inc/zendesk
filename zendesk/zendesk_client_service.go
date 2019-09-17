@@ -98,6 +98,7 @@ func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 	}
 
 	password := util.Config("zendesk.password")
+	log.Printf("[zendesk_client_service][NewEnvClient]Zendesk config: %s, %s, %s", domain, username, password)
 	if password == "" {
 		return nil, errors.New("ZENDESK_PASSWORD not found")
 	}
@@ -114,6 +115,7 @@ func NewClient(domain, username, password string, middleware ...MiddlewareFuncti
 
 // NewURLClient is like NewClient but accepts an explicit end point instead of a Zendesk domain.
 func NewURLClient(endpoint, username, password string, middleware ...MiddlewareFunction) (Client, error) {
+	log.Printf("[zendesk_client_service][NewURLClient]Zendesk config: %s, %s, %s", endpoint, username, password)
 	baseURL, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
