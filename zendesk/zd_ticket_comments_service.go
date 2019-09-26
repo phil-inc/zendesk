@@ -74,20 +74,20 @@ func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
 }
 
 func (c *client) GetAllTicketComments(ticketIDs []int64) (map[int64][]TicketComment, error) {
-	log.Printf("[ZENDESK] Start GetAllTicketComments")
+	log.Printf("[zd_ticket_comments_service][GetAllTicketComments] Start GetAllTicketComments")
 	ticketCommentsMap, err := c.getTicketCommentsOneByOne(nil, ticketIDs)
 	if err != nil {
 		return nil, err
 	}
-	log.Printf("[ZENDESK] number of ticket comments: %v", len(ticketCommentsMap))
-	log.Printf("[ZENDESK] End GetAllTicketComments")
+	log.Printf("[zd_ticket_comments_service][GetAllTicketComments] number of ticket comments: %v", len(ticketCommentsMap))
+	log.Printf("[zd_ticket_comments_service][GetAllTicketComments] End GetAllTicketComments")
 	return ticketCommentsMap, nil
 }
 
 // getTicketCommentOneByOne return a map with ticket id as the key and
 // an array of ticket comments as its value
 func (c *client) getTicketCommentsOneByOne(in interface{}, ticketIDs []int64) (map[int64][]TicketComment, error) {
-	log.Printf("[ZENDESK] Start getTicketCommentsOneByOne")
+	log.Printf("[zd_ticket_comments_service][getAllTicketComments] Start getTicketCommentsOneByOne")
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/comments.json"
 
@@ -107,22 +107,22 @@ func (c *client) getTicketCommentsOneByOne(in interface{}, ticketIDs []int64) (m
 	if numTickets == 0 {
 		return result, nil
 	}
-	log.Printf("[ZENDESK] numTickets: %v", numTickets)
+	log.Printf("[zd_ticket_comments_service][getAllTicketComments] numTickets: %v", numTickets)
 
 	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[0], endpointPostfix)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 
 	var totalWaitTime int64
-	log.Printf("[ZENDESK] Start for loop in getTicketCommentsOneByOne")
+	log.Printf("[zd_ticket_comments_service][getAllTicketComments] Start for loop in getTicketCommentsOneByOne")
 	for ticketInd := 1; ticketInd < numTickets; ticketInd++ {
 		// handle page not found
 		if res.StatusCode == 404 {
-			log.Printf("[ZENDESK] 404 not found: %s\n", endpoint)
+			log.Printf("[zd_ticket_comments_service][getAllTicketComments] 404 not found: %s\n", endpoint)
 			// handle too many requests (rate limit)
 		} else if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zd_ticket_comments_service][getAllTicketComments] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
@@ -142,7 +142,7 @@ func (c *client) getTicketCommentsOneByOne(in interface{}, ticketIDs []int64) (m
 		res, _ = c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	}
 
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zd_ticket_comments_service][getAllTicketComments] number of records pulled: %v\n", len(result))
+	log.Printf("[zd_ticket_comments_service][getAllTicketComments] total waiting time due to rate limit: %v\n", totalWaitTime)
 	return result, nil
 }

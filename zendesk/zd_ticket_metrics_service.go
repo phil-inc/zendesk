@@ -49,12 +49,12 @@ func (c *client) ShowTicketMetric(id int64) (*TicketMetric, error) {
 }
 
 func (c *client) GetAllTicketMetrics() ([]TicketMetric, error) {
-	log.Printf("[ZENDESK] Start GetAllTicketMetrics")
+	log.Printf("[zd_ticket_metrics_service][GetAllTicketMetrics] Start GetAllTicketMetrics")
 	// []int64{} is a placeholder which should be replaced by the actual tickets IDs
 	// since we only pull the entire history of ticket metrics only once, this function
 	// may not be used anymore
 	ticketmetrics, err := c.getTicketMetricOneByOne(nil, []int64{})
-	log.Printf("[ZENDESK] number of ticketmetrics: %v", len(ticketmetrics))
+	log.Printf("[zd_ticket_metrics_service][GetAllTicketMetrics] number of ticketmetrics: %v", len(ticketmetrics))
 	return ticketmetrics, err
 }
 
@@ -92,7 +92,7 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zd_ticket_metrics_service][getAllTicketMetrics] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
@@ -103,7 +103,7 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 				result = append(result, dataPerPage.TicketMetrics...)
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
+			log.Printf("[zd_ticket_metrics_service][getAllTicketMetrics] pulling page: %s\n", currentPage)
 		}
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
@@ -112,14 +112,14 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 			return nil, err
 		}
 	}
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zd_ticket_metrics_service][getAllTicketMetrics] number of records pulled: %v\n", len(result))
+	log.Printf("[zd_ticket_metrics_service][getAllTicketMetrics] total waiting time due to rate limit: %v\n", totalWaitTime)
 
 	return result, err
 }
 
 func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]TicketMetric, error) {
-	log.Printf("[ZENDESK] Start getTicketMetricOneByOne")
+	log.Printf("[zd_ticket_metrics_service][getTicketMetricOneByOne] Start getTicketMetricOneByOne")
 	endpointPrefix := "/api/v2/tickets/"
 	endpointPostfix := "/metrics.json"
 
@@ -139,22 +139,22 @@ func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]T
 	if numTickets == 0 {
 		return result, nil
 	}
-	log.Printf("[ZENDESK] numTickets: %v", numTickets)
+	log.Printf("[zd_ticket_metrics_service][getTicketMetricOneByOne] numTickets: %v", numTickets)
 
 	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[0], endpointPostfix)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	defer res.Body.Close()
 
 	var totalWaitTime int64
-	log.Printf("[ZENDESK] Start for loop in getTicketMetricOneByOne")
+	log.Printf("[zd_ticket_metrics_service][getTicketMetricOneByOne] Start for loop in getTicketMetricOneByOne")
 	for ticketInd := 1; ticketInd < numTickets; ticketInd++ {
 		// handle page not found
 		if res.StatusCode == 404 {
-			log.Printf("[ZENDESK] 404 not found: %s\n", endpoint)
+			log.Printf("[zd_ticket_metrics_service][getTicketMetricOneByOne] 404 not found: %s\n", endpoint)
 			// handle too many requests (rate limit)
 		} else if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zd_ticket_metrics_service][getTicketMetricOneByOne] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
@@ -178,18 +178,18 @@ func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]T
 		res, _ = c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	}
 
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zd_ticket_metrics_service][getTicketMetricOneByOne] number of records pulled: %v\n", len(result))
+	log.Printf("[zd_ticket_metrics_service][getTicketMetricOneByOne] total waiting time due to rate limit: %v\n", totalWaitTime)
 	return result, nil
 }
 
 func (c *client) GetTicketMetricsIncrementally(ticketIDs []int64) ([]TicketMetric, error) {
-	log.Printf("[ZENDESK] GetTicketMetricsIncrementally")
+	log.Printf("[zd_ticket_metrics_service][GetTicketMetricsIncrementally] GetTicketMetricsIncrementally")
 	ticketMetrics, err := c.getTicketMetricOneByOne(nil, ticketIDs)
 	if err != nil {
-		log.Printf("[ZENDESK] error pulling ticket metrics by ticketIDs: %s\n", err)
+		log.Printf("[zd_ticket_metrics_service][GetTicketMetricsIncrementally] error pulling ticket metrics by ticketIDs: %s\n", err)
 		return nil, err
 	}
-	log.Printf("[ZENDESK] number of ticketMetrics: %v", len(ticketMetrics))
+	log.Printf("[zd_ticket_metrics_service][GetTicketMetricsIncrementally] number of ticketMetrics: %v", len(ticketMetrics))
 	return ticketMetrics, nil
 }

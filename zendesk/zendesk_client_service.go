@@ -254,7 +254,7 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zendesk_client_service][getAll] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
@@ -265,7 +265,7 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 				result = append(result, dataPerPage.Tickets...)
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
+			log.Printf("[zendesk_client_service][getAll] pulling page: %s\n", currentPage)
 		}
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
@@ -274,8 +274,8 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 			return nil, err
 		}
 	}
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zendesk_client_service][getAll] number of records pulled: %v\n", len(result))
+	log.Printf("[zendesk_client_service][getAll] total waiting time due to rate limit: %v\n", totalWaitTime)
 
 	return result, err
 }
@@ -308,15 +308,15 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 
 	var totalWaitTime int64
 	for ticketID < endID {
-		log.Printf("[ZENDESK] currently extracting: %s\n", endpoint)
+		log.Printf("[zendesk_client_service][getOneByOne] currently extracting: %s\n", endpoint)
 
 		// handle page not found
 		if res.StatusCode == 404 {
-			log.Printf("[ZENDESK] 404 not found: %s\n", endpoint)
+			log.Printf("[zendesk_client_service][getOneByOne] 404 not found: %s\n", endpoint)
 			// handle too many requests (rate limit)
 		} else if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zendesk_client_service][getOneByOne] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
@@ -338,8 +338,8 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 		res, _ = c.request("GET", endpoint, headers, bytes.NewReader(payload))
 	}
 
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zendesk_client_service][getOneByOne] number of records pulled: %v\n", len(result))
+	log.Printf("[zendesk_client_service][getOneByOne] total waiting time due to rate limit: %v\n", totalWaitTime)
 	return result, nil
 }
 

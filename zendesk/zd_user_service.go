@@ -165,16 +165,16 @@ func (c *client) AddUserTags(id int64, tags []string) ([]string, error) {
 //
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export#incremental-user-export
 func (c *client) GetUsersIncrementally(unixTime int64) ([]User, error) {
-	log.Printf("[ZENDESK] Start GetUsersIncrementally")
+	log.Printf("[zd_user_service][GetUsersIncrementally] Start GetUsersIncrementally")
 	log.Printf("[zd_user_service][GetUsersIncrementally] %s, %s", c.username, c.password)
 	users, err := c.getUsersIncrementally(unixTime, nil)
-	log.Printf("[ZENDESK] Number of Users: %v", len(users))
+	log.Printf("[zd_user_service][GetUsersIncrementally] Number of Users: %v", len(users))
 	return users, err
 }
 
 func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, error) {
-	log.Printf("[ZENDESK] Start getUsersIncrementally")
-	log.Printf("[zd_user_service][GetUsersIncrementally] %s, %s", c.username, c.password)
+	log.Printf("[zd_user_service][getUsersIncrementally] Start getUsersIncrementally")
+	log.Printf("[zd_user_service][getUsersIncrementally] %s, %s", c.username, c.password)
 	result := make([]User, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -200,13 +200,13 @@ func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, 
 	dataPerPage := new(APIPayload)
 	currentPage := "emptypage"
 	var totalWaitTime int64
-	log.Printf("[ZENDESK] Start for loop in getUsersIncrementally")
+	log.Printf("[zd_user_service][getUsersIncrementally] Start for loop in getUsersIncrementally")
 	for currentPage != dataPerPage.NextPage {
 
 		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zd_user_service][getUsersIncrementally] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
@@ -229,8 +229,8 @@ func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, 
 
 		dataPerPage = new(APIPayload)
 	}
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zd_user_service][getUsersIncrementally] number of records pulled: %v\n", len(result))
+	log.Printf("[zd_user_service][getUsersIncrementally] total waiting time due to rate limit: %v\n", totalWaitTime)
 
 	return getUniqUsers(result), err
 }
@@ -304,7 +304,7 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 				return nil, err
 			}
 
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zd_user_service][getAllUsers] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			time.Sleep(time.Duration(after) * time.Second)
 		} else {
@@ -312,7 +312,7 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 				result = append(result, dataPerPage.Users...)
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[ZENDESK] pulling page: %s\n", currentPage)
+			log.Printf("[zd_user_service][getAllUsers] pulling page: %s\n", currentPage)
 		}
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
@@ -321,8 +321,8 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 			return nil, err
 		}
 	}
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zd_user_service][getAllUsers] number of records pulled: %v\n", len(result))
+	log.Printf("[zd_user_service][getAllUsers] total waiting time due to rate limit: %v\n", totalWaitTime)
 
 	return result, err
 }

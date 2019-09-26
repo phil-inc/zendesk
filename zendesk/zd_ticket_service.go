@@ -89,15 +89,15 @@ func (c *client) GetAllTickets() ([]Ticket, error) {
 //
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export
 func (c *client) GetTicketsIncrementally(unixTime int64) ([]Ticket, error) {
-	log.Printf("[ZENDESK] Start GetTicketsIncrementally")
+	log.Printf("[zd_ticket_service][GetTicketsIncrementally] Start GetTicketsIncrementally")
 	log.Printf("[zd_ticket_service][GetTicketsIncrementally] %s, %s", c.username, c.password)
 	tickets, err := c.getTicketsIncrementally(unixTime, nil)
-	log.Printf("[ZENDESK] Number of tickets: %v", len(tickets))
+	log.Printf("[zd_ticket_service][GetTicketsIncrementally] Number of tickets: %v", len(tickets))
 	return tickets, err
 }
 
 func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Ticket, error) {
-	log.Printf("[ZENDESK] Start getTicketsIncrementally")
+	log.Printf("[zd_ticket_service][getTicketsIncrementally] Start getTicketsIncrementally")
 	log.Printf("[zd_ticket_service][getTicketsIncrementally] %s, %s", c.username, c.password)
 	result := make([]Ticket, 0)
 	payload, err := marshall(in)
@@ -124,12 +124,12 @@ func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Tick
 	dataPerPage := new(APIPayload)
 	currentPage := "emptypage"
 	var totalWaitTime int64
-	log.Printf("[ZENDESK] Start for loop in getTicketsIncrementally")
+	log.Printf("[zd_ticket_service][getTicketsIncrementally] Start for loop in getTicketsIncrementally")
 	for currentPage != dataPerPage.NextPage {
 		// if too many requests(res.StatusCode == 429), delay sending request
 		if res.StatusCode == 429 {
 			after, err := strconv.ParseInt(res.Header.Get("Retry-After"), 10, 64)
-			log.Printf("[ZENDESK] too many requests. Wait for %v seconds\n", after)
+			log.Printf("[zd_ticket_service][getTicketsIncrementally] too many requests. Wait for %v seconds\n", after)
 			totalWaitTime += after
 			if err != nil {
 				return nil, err
@@ -152,8 +152,8 @@ func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Tick
 
 		dataPerPage = new(APIPayload)
 	}
-	log.Printf("[ZENDESK] number of records pulled: %v\n", len(result))
-	log.Printf("[ZENDESK] total waiting time due to rate limit: %v\n", totalWaitTime)
+	log.Printf("[zd_ticket_service][getTicketsIncrementally] number of records pulled: %v\n", len(result))
+	log.Printf("[zd_ticket_service][getTicketsIncrementally] total waiting time due to rate limit: %v\n", totalWaitTime)
 
 	return getUniqTickets(result), err
 }
