@@ -56,15 +56,21 @@ type Via struct {
 type Flow struct {
 	To   *ToObject   `json:"to"`
 	From *FromObject `json:"from"`
-	Rel  string      `json:"rel"`
-}
-
-type ToObject struct {
+	Rel  *string     `json:"rel"`
 }
 
 type FromObject struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
+	FromName               *string  `json:"name,omitempty"`
+	FromAddress            *string  `json:"address,omitempty"`
+	FromOriginalRecipients []string `json:"original_recipients,omitempty"`
+	FromPhone              *string  `json:"phone,omitempty"`
+}
+
+type ToObject struct {
+	ToName     *string  `json:"name,omitempty"`
+	ToAddress  *string  `json:"address,omitempty"`
+	ToEmailCcs []string `json:"email_ccs,omitempty"`
+	ToPhone    *string  `json:"phone,omitempty"`
 }
 
 func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
