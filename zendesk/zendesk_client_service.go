@@ -69,6 +69,7 @@ type Client interface {
 	GetAllTicketComments([]int64) (map[int64][]TicketComment, error)
 	GetUsersIncrementally(int64) ([]User, error)
 	GetSatisfactionScores() ([]Score, error)
+	GetSatisfactionScoresIncrementally() ([]Score, error)
 }
 
 type RequestFunction func(*http.Request) (*http.Response, error)
