@@ -68,6 +68,8 @@ type Client interface {
 	ShowTicketMetric(int64) (*TicketMetric, error)
 	GetAllTicketComments([]int64) (map[int64][]TicketComment, error)
 	GetUsersIncrementally(int64) ([]User, error)
+	GetSatisfactionScores() ([]Score, error)
+	GetSatisfactionScoresIncrementally() ([]Score, error)
 }
 
 type RequestFunction func(*http.Request) (*http.Response, error)
@@ -408,6 +410,8 @@ type APIPayload struct {
 	TicketMetric            *TicketMetric            `json:"ticket_metric,omitempty"`
 	TicketMetrics           []TicketMetric           `json:"ticket_metrics,omitempty"`
 	NextPage                string                   `json:"next_page,omitempty"`
+	SatisfactionRating      Score                    `json:"satisfaction_rating,omitempty"`
+	SatisfactionRatings     []Score                  `json:"satisfaction_ratings,omitempty"`
 }
 
 // APIError represents an error response returnted by the API.
