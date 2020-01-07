@@ -149,6 +149,9 @@ func (c *client) getSatisfactionScoresIncrementally(currentPage string, in inter
 				break
 			}
 			currentPage = dataPerPage.NextPage
+			if currentPage == "" {
+				break
+			}
 			log.Printf("[zd_ticket_score_service][getSatisfactionScores] pulling page: %s\n", currentPage)
 		}
 
