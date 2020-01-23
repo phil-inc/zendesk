@@ -166,7 +166,6 @@ func (c *client) AddUserTags(id int64, tags []string) ([]string, error) {
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export#incremental-user-export
 func (c *client) GetUsersIncrementally(unixTime int64) ([]User, error) {
 	log.Printf("[zd_user_service][GetUsersIncrementally] Start GetUsersIncrementally")
-	log.Printf("[zd_user_service][GetUsersIncrementally] %s, %s", c.username, c.password)
 	users, err := c.getUsersIncrementally(unixTime, nil)
 	log.Printf("[zd_user_service][GetUsersIncrementally] Number of Users: %v", len(users))
 	return users, err
@@ -174,7 +173,6 @@ func (c *client) GetUsersIncrementally(unixTime int64) ([]User, error) {
 
 func (c *client) getUsersIncrementally(unixTime int64, in interface{}) ([]User, error) {
 	log.Printf("[zd_user_service][getUsersIncrementally] Start getUsersIncrementally")
-	log.Printf("[zd_user_service][getUsersIncrementally] %s, %s", c.username, c.password)
 	result := make([]User, 0)
 	payload, err := marshall(in)
 	if err != nil {
@@ -312,7 +310,6 @@ func (c *client) getAllUsers(endpoint string, in interface{}) ([]User, error) {
 				result = append(result, dataPerPage.Users...)
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[zd_user_service][getAllUsers] pulling page: %s\n", currentPage)
 		}
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)

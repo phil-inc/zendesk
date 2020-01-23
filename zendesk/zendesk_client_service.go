@@ -100,7 +100,6 @@ func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
 	}
 
 	password := util.Config("zendesk.password")
-	log.Printf("[zendesk_client_service][NewEnvClient]Zendesk config: %s, %s, %s", domain, username, password)
 	if password == "" {
 		return nil, errors.New("ZENDESK_PASSWORD not found")
 	}
@@ -117,7 +116,6 @@ func NewClient(domain, username, password string, middleware ...MiddlewareFuncti
 
 // NewURLClient is like NewClient but accepts an explicit end point instead of a Zendesk domain.
 func NewURLClient(endpoint, username, password string, middleware ...MiddlewareFunction) (Client, error) {
-	log.Printf("[zendesk_client_service][NewURLClient]Zendesk config: %s, %s, %s", endpoint, username, password)
 	baseURL, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
@@ -267,7 +265,6 @@ func (c *client) getAll(endpoint string, in interface{}) ([]Ticket, error) {
 				result = append(result, dataPerPage.Tickets...)
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[zendesk_client_service][getAll] pulling page: %s\n", currentPage)
 		}
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)
@@ -310,7 +307,6 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 
 	var totalWaitTime int64
 	for ticketID < endID {
-		log.Printf("[zendesk_client_service][getOneByOne] currently extracting: %s\n", endpoint)
 
 		// handle page not found
 		if res.StatusCode == 404 {

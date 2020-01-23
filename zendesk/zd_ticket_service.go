@@ -90,7 +90,6 @@ func (c *client) GetAllTickets() ([]Ticket, error) {
 // https://developer.zendesk.com/rest_api/docs/support/incremental_export
 func (c *client) GetTicketsIncrementally(unixTime int64) ([]Ticket, error) {
 	log.Printf("[zd_ticket_service][GetTicketsIncrementally] Start GetTicketsIncrementally")
-	log.Printf("[zd_ticket_service][GetTicketsIncrementally] %s, %s", c.username, c.password)
 	tickets, err := c.getTicketsIncrementally(unixTime, nil)
 	log.Printf("[zd_ticket_service][GetTicketsIncrementally] Number of tickets: %v", len(tickets))
 	return tickets, err
@@ -98,7 +97,6 @@ func (c *client) GetTicketsIncrementally(unixTime int64) ([]Ticket, error) {
 
 func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Ticket, error) {
 	log.Printf("[zd_ticket_service][getTicketsIncrementally] Start getTicketsIncrementally")
-	log.Printf("[zd_ticket_service][getTicketsIncrementally] %s, %s", c.username, c.password)
 	result := make([]Ticket, 0)
 	payload, err := marshall(in)
 	if err != nil {

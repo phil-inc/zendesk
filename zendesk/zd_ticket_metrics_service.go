@@ -103,7 +103,6 @@ func (c *client) getAllTicketMetrics(endpoint string, in interface{}) ([]TicketM
 				result = append(result, dataPerPage.TicketMetrics...)
 			}
 			currentPage = dataPerPage.NextPage
-			log.Printf("[zd_ticket_metrics_service][getAllTicketMetrics] pulling page: %s\n", currentPage)
 		}
 		res, _ = c.request("GET", dataPerPage.NextPage[apiStartIndex:], headers, bytes.NewReader(payload))
 		dataPerPage = new(APIPayload)

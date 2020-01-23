@@ -87,7 +87,6 @@ func (c *client) getSatisfactionScores(endpoint string, in interface{}) ([]Score
 		} else {
 			result = append(result, dataPerPage.SatisfactionRatings...)
 			currentPage = dataPerPage.NextPage
-			log.Printf("[zd_ticket_score_service][getSatisfactionScores] pulling page: %s\n", currentPage)
 		}
 
 		currentPage = fmt.Sprintf("%s%v", endpoint, startingPageNumber+count)
@@ -152,7 +151,6 @@ func (c *client) getSatisfactionScoresIncrementally(currentPage string, in inter
 			if currentPage == "" {
 				break
 			}
-			log.Printf("[zd_ticket_score_service][getSatisfactionScores] pulling page: %s\n", currentPage)
 		}
 
 		res, _ = c.request("GET", currentPage, headers, bytes.NewReader(payload))
