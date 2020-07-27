@@ -3,7 +3,6 @@ package zendesk
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -12,8 +11,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/phil-inc/plib/core/util"
 )
 
 // Client describes a client for the Zendesk Core API.
@@ -85,26 +82,6 @@ type client struct {
 	userAgent string
 	reqFunc   RequestFunction
 	headers   map[string]string
-}
-
-// NewEnvClient creates a new Client configured via environment variables.
-func NewEnvClient(middleware ...MiddlewareFunction) (Client, error) {
-	domain := util.Config("zendesk.domain")
-	if domain == "" {
-		return nil, errors.New("ZENDESK DOMAIN not found")
-	}
-
-	username := util.Config("zendesk.username")
-	if username == "" {
-		return nil, errors.New("ZENDESK_USERNAME not found")
-	}
-
-	password := util.Config("zendesk.password")
-	if password == "" {
-		return nil, errors.New("ZENDESK_PASSWORD not found")
-	}
-
-	return NewClient(domain, username, password, middleware...)
 }
 
 // NewClient creates a new Client.
