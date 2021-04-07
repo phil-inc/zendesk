@@ -340,6 +340,9 @@ func marshall(in interface{}) ([]byte, error) {
 
 func unmarshall(res *http.Response, out interface{}) error {
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		if res.StatusCode >= 500 {
+			log.Printf("[EXTERNAL][FATAL][ZENDESK] %d response code with Zendesk", res.StatusCode)
+		}
 		apierr := new(APIError)
 		apierr.Response = res
 		if err := json.NewDecoder(res.Body).Decode(apierr); err != nil {
