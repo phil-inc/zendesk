@@ -45,6 +45,7 @@ type Client interface {
 	ListUsers(*ListUsersOptions) ([]User, error)
 	MakeIdentityPrimary(int64, int64) ([]UserIdentity, error)
 	SearchUsers(string) ([]User, error)
+	SearchTickets(string) ([]Ticket, error)
 	ShowIdentity(int64, int64) (*UserIdentity, error)
 	ShowLocale(int64) (*Locale, error)
 	ShowLocaleByCode(string) (*Locale, error)
