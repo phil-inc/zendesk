@@ -45,7 +45,7 @@ type Client interface {
 	ListUsers(*ListUsersOptions) ([]User, error)
 	MakeIdentityPrimary(int64, int64) ([]UserIdentity, error)
 	SearchUsers(string) ([]User, error)
-	SearchTickets(string) ([]Ticket, error)
+	SearchTickets(string) (APIPayload, error)
 	ShowIdentity(int64, int64) (*UserIdentity, error)
 	ShowLocale(int64) (*Locale, error)
 	ShowLocaleByCode(string) (*Locale, error)
@@ -340,6 +340,7 @@ func marshall(in interface{}) ([]byte, error) {
 }
 
 func unmarshall(res *http.Response, out interface{}) error {
+	log.Printf("[Test] response: %+v\n", res)
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		if res.StatusCode >= 500 {
 			log.Printf("[EXTERNAL][FATAL][ZENDESK] %d response code with Zendesk", res.StatusCode)

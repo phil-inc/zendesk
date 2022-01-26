@@ -367,8 +367,9 @@ func (c *client) AddTicketTags(id int64, tags []string) ([]string, error) {
 // SearchTickets searches tickets by query.
 //
 // Zendesk Core API docs: https://developer.zendesk.com/api-reference/ticketing/ticket-management/search/
-func (c *client) SearchTickets(query string) ([]Ticket, error) {
+func (c *client) SearchTickets(query string) (APIPayload, error) {
 	out := new(APIPayload)
 	err := c.get("/api/v2/search.json?query="+query, out)
-	return out.Tickets, err
+	fmt.Printf("%+v\n", out)
+	return *out, err
 }
