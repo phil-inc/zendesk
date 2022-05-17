@@ -67,10 +67,10 @@ type FromObject struct {
 }
 
 type ToObject struct {
-	ToName     *string  `json:"name,omitempty"`
-	ToAddress  *string  `json:"address,omitempty"`
-	ToEmailCcs []string `json:"email_ccs,omitempty"`
-	ToPhone    *string  `json:"phone,omitempty"`
+	ToName     *string       `json:"name,omitempty"`
+	ToAddress  *string       `json:"address,omitempty"`
+	ToEmailCcs []interface{} `json:"email_ccs,omitempty"`
+	ToPhone    *string       `json:"phone,omitempty"`
 }
 
 func (c *client) ListTicketComments(id int64) ([]TicketComment, error) {
