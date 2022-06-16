@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
@@ -109,8 +110,12 @@ func (c *client) getTicketsIncrementally(unixTime int64, in interface{}) ([]Tick
 	}
 
 	apiV2 := "/api/v2/incremental/tickets.json?start_time="
-	url := "https://philhelp.zendesk.com" + apiV2
-	apiStartIndex := strings.Index(url, apiV2)
+	rel, err := url.Parse(apiV2)
+	if err != nil {
+		return nil, err
+	}
+	url := c.baseURL.ResolveReference(rel)
+	apiStartIndex := strings.Index(url.String(), apiV2)
 	endpoint := fmt.Sprintf("%s%v", apiV2, unixTime)
 
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
