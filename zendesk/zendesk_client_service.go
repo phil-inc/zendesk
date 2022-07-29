@@ -67,6 +67,7 @@ type Client interface {
 	GetUsersIncrementally(int64) ([]User, error)
 	GetSatisfactionScores() ([]Score, error)
 	GetSatisfactionScoresIncrementally(int64) ([]Score, error)
+	GetCallLegIncrementally(int64) ([]CallLeg, error)
 }
 
 type RequestFunction func(*http.Request) (*http.Response, error)
@@ -388,6 +389,7 @@ type APIPayload struct {
 	NextPage                string                   `json:"next_page,omitempty"`
 	SatisfactionRating      Score                    `json:"satisfaction_rating,omitempty"`
 	SatisfactionRatings     []Score                  `json:"satisfaction_ratings,omitempty"`
+	CallLegs                []CallLeg                `json:"legs,omitempty"`
 }
 
 // APIError represents an error response returnted by the API.
