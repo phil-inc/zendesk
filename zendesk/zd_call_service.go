@@ -87,7 +87,7 @@ type CallLeg struct {
 func (c *client) GetCallLegIncrementally(unixTime int64) ([]CallLeg, error) {
 	log.Printf("[zd_ticket_service][GetCallLegsIncrementally] Start GetCallLegsIncrementally")
 	callLegs, err := c.getCallLegsIncrementally(unixTime, nil)
-	log.Printf("[zd_ticket_service][GetTicketsIncrementally] Number of CallLegs: %v", len(callLegs))
+	log.Printf("[zd_ticket_service][GetCallLegsIncrementally] Number of CallLegs: %v", len(callLegs))
 	return callLegs, err
 }
 
@@ -99,10 +99,10 @@ func (c *client) getCallLegsIncrementally(unixTime int64, in interface{}) ([]Cal
 		return nil, err
 	}
 
+	// For Business level, content type must be application/json
+	// https://developer.zendesk.com/api-reference/ticketing/introduction/#400-range
 	headers := map[string]string{}
-	if in != nil {
-		headers["Content-Type"] = "application/json"
-	}
+	headers["Content-Type"] = "application/json"
 
 	apiV2 := "/api/v2/channels/voice/stats/incremental/legs?start_time="
 	rel, err := url.Parse(apiV2)
