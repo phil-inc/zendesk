@@ -398,6 +398,6 @@ func (c *client) DeleteIdentity(userID, id int64) error {
 
 func (c *client) MakeIdentityPrimary(userID, id int64) ([]UserIdentity, error) {
 	out := new(APIPayload)
-	err := c.put(fmt.Sprintf("/api/v2/end_users/%d/identities/%d/make_primary.json", userID, id), nil, out)
+	err := c.put(fmt.Sprintf("/api/v2/users/%d/identities/%d/make_primary.json", userID, id), nil, out)
 	return out.Identities, err
 }
