@@ -281,6 +281,9 @@ func (c *client) getOneByOne(in interface{}) ([]Ticket, error) {
 	ticketID := startID // start
 	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketID, endpointPostfix)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
 	defer res.Body.Close()
 
 	var totalWaitTime int64

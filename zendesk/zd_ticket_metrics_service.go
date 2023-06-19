@@ -142,6 +142,9 @@ func (c *client) getTicketMetricOneByOne(in interface{}, ticketIDs []int64) ([]T
 
 	endpoint := fmt.Sprintf("%s%v%s", endpointPrefix, ticketIDs[0], endpointPostfix)
 	res, err := c.request("GET", endpoint, headers, bytes.NewReader(payload))
+	if err != nil {
+		return nil, err
+	}
 	defer res.Body.Close()
 
 	var totalWaitTime int64
